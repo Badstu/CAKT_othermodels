@@ -12,7 +12,7 @@ from data_loader import DATA
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', type=int, default=0, help='the gpu will be used, e.g "0,1,2,3"')
-    parser.add_argument('--max_iter', type=int, default=30, help='number of iterations')
+    parser.add_argument('--max_iter', type=int, default=50, help='number of iterations')
     parser.add_argument('--decay_epoch', type=int, default=20, help='number of iterations')
     parser.add_argument('--test', type=bool, default=False, help='enable testing')
     parser.add_argument('--train_test', type=bool, default=True, help='enable testing')
@@ -28,12 +28,13 @@ def main():
     parser.add_argument('--dataset', type=str, default='assist2009_updated')
     parser.add_argument('--train_set', type=int, default=1)
 
-
+    parser.add_argument('--memory_size', type=int, default=20, help='memory size')
+    parser.add_argument('--q_embed_dim', type=int, default=50, help='question embedding dimensions')
+    parser.add_argument('--qa_embed_dim', type=int, default=200, help='answer and question embedding dimensions')
+    
     if parser.parse_args().dataset == 'assist2009_updated':
-        parser.add_argument('--q_embed_dim', type=int, default=50, help='question embedding dimensions')
+        # memory_size: 20, q_embed_dim: 50, qa_embed_dim: 200
         parser.add_argument('--batch_size', type=int, default=128, help='the batch size')
-        parser.add_argument('--qa_embed_dim', type=int, default=200, help='answer and question embedding dimensions')
-        parser.add_argument('--memory_size', type=int, default=20, help='memory size')
         parser.add_argument('--n_question', type=int, default=110, help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
         parser.add_argument('--data_dir', type=str, default='../dataset/assist2009_updated', help='data directory')
@@ -43,10 +44,8 @@ def main():
         parser.add_argument('--final_fc_dim', type=float, default=110, help='hidden state dim for final fc layer')
     
     elif parser.parse_args().dataset == 'assist2015':
+        # memory_size: 50, q_embed_dim: 50, qa_embed_dim: 200
         parser.add_argument('--batch_size', type=int, default=128, help='the batch size')
-        parser.add_argument('--q_embed_dim', type=int, default=50, help='question embedding dimensions')
-        parser.add_argument('--qa_embed_dim', type=int, default=200, help='answer and question embedding dimensions')
-        parser.add_argument('--memory_size', type=int, default=50, help='memory size')
         parser.add_argument('--n_question', type=int, default=100, help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
         parser.add_argument('--data_dir', type=str, default='../dataset/assist2015', help='data directory')
@@ -54,25 +53,10 @@ def main():
         parser.add_argument('--load', type=str, default='assist2015', help='model file to load')
         parser.add_argument('--save', type=str, default='assist2015', help='path to save model')
         parser.add_argument('--final_fc_dim', type=float, default=100, help='hidden state dim for final fc layer')
-
-    elif parser.parse_args().dataset == 'STATICS':
-        parser.add_argument('--batch_size', type=int, default=128, help='the batch size')
-        parser.add_argument('--q_embed_dim', type=int, default=50, help='question embedding dimensions')
-        parser.add_argument('--qa_embed_dim', type=int, default=100, help='answer and question embedding dimensions')
-        parser.add_argument('--memory_size', type=int, default=50, help='memory size')
-        parser.add_argument('--n_question', type=int, default=1223, help='the number of unique questions in the dataset')
-        parser.add_argument('--seqlen', type=int, default=6, help='the allowed maximum length of a sequence')
-        parser.add_argument('--data_dir', type=str, default='../dataset/STATICS', help='data directory')
-        parser.add_argument('--data_name', type=str, default='STATICS', help='data set name')
-        parser.add_argument('--load', type=str, default='STATICS', help='model file to load')
-        parser.add_argument('--save', type=str, default='STATICS', help='path to save model')
-        parser.add_argument('--final_fc_dim', type=float, default=1223, help='hidden state dim for final fc layer')
-
+   
     elif parser.parse_args().dataset == 'assist2017':
-        parser.add_argument('--q_embed_dim', type=int, default=50, help='question embedding dimensions')
-        parser.add_argument('--memory_size', type=int, default=20, help='memory size')
-        parser.add_argument('--batch_size', type=int, default=128, help='the batch size')
-        parser.add_argument('--qa_embed_dim', type=int, default=100, help='answer and question embedding dimensions')
+        # memory_size: 20, q_embed_dim: 50, qa_embed_dim: 100
+        parser.add_argument('--batch_size', type=int, default=32, help='the batch size')
         parser.add_argument('--n_question', type=int, default=102,
                             help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
@@ -82,11 +66,20 @@ def main():
         parser.add_argument('--save', type=str, default='assist2017', help='path to save model')
         parser.add_argument('--final_fc_dim', type=float, default=102, help='hidden state dim for final fc layer')
 
+    elif parser.parse_args().dataset == 'STATICS':
+        # memory_size: 50, q_embed_dim: 50, qa_embed_dim: 100
+        parser.add_argument('--batch_size', type=int, default=32, help='the batch size')
+        parser.add_argument('--n_question', type=int, default=1223, help='the number of unique questions in the dataset')
+        parser.add_argument('--seqlen', type=int, default=6, help='the allowed maximum length of a sequence')
+        parser.add_argument('--data_dir', type=str, default='../dataset/STATICS', help='data directory')
+        parser.add_argument('--data_name', type=str, default='STATICS', help='data set name')
+        parser.add_argument('--load', type=str, default='STATICS', help='model file to load')
+        parser.add_argument('--save', type=str, default='STATICS', help='path to save model')
+        parser.add_argument('--final_fc_dim', type=float, default=1223, help='hidden state dim for final fc layer')
+
     elif parser.parse_args().dataset == 'synthetic':
-        parser.add_argument('--q_embed_dim', type=int, default=50, help='question embedding dimensions')
-        parser.add_argument('--memory_size', type=int, default=20, help='memory size')
+        # memory_size: 20, q_embed_dim: 50, qa_embed_dim: 100
         parser.add_argument('--batch_size', type=int, default=128, help='the batch size')
-        parser.add_argument('--qa_embed_dim', type=int, default=100, help='answer and question embedding dimensions')
         parser.add_argument('--n_question', type=int, default=50,
                             help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
@@ -140,13 +133,8 @@ def main():
         torch.cuda.set_device(params.gpu)
         model.cuda()
 
-    # all_train_loss = {}
-    # all_train_accuracy = {}
-    # all_train_auc = {}
-    # all_valid_loss = {}
-    # all_valid_accuracy = {}
-    # all_valid_auc = {}
     best_valid_auc = 0
+    correspond_train_auc = 0
     correspond_test_auc = 0
 
     for idx in range(params.max_iter):
@@ -157,20 +145,14 @@ def main():
         test_loss, test_accuracy, test_auc = test(model, params, optimizer, test_q_data, test_qa_data)
         print('Epoch %d/%d, valid auc : %3.5f, valid accuracy : %3.5f' % (idx + 1, params.max_iter, test_auc, test_accuracy))
 
-        # all_train_auc[idx + 1] = train_auc
-        # all_train_accuracy[idx + 1] = train_accuracy
-        # all_train_loss[idx + 1] = train_loss
-        # all_valid_loss[idx + 1] = valid_loss
-        # all_valid_accuracy[idx + 1] = valid_accuracy
-        # all_valid_auc[idx + 1] = valid_auc
-        #
         # output the epoch with the best validation auc
         if valid_auc > best_valid_auc:
             print('%3.4f to %3.4f' % (best_valid_auc, valid_auc))
             best_valid_auc = valid_auc
+            correspond_train_auc = train_auc
             correspond_test_auc = test_auc
 
-    print('DATASET: {}, BEST VALID AUC: {}, CORRESPOND TEST AUC: {}'.format(params.data_name, best_valid_auc, correspond_test_auc))
+    print('DATASET: {}, BEST VALID AUC: {}, CORRESPOND TRAIN AUC: {}, CORRESPOND TEST AUC: {}'.format(params.data_name, best_valid_auc, correspond_train_auc, correspond_test_auc))
 
 if __name__ == "__main__":
     main()
