@@ -54,7 +54,7 @@ def main():
         # parser.add_argument('--qa_embed_dim', type=int, default=200, help='answer and question embedding dimensions')
         parser.add_argument('--n_question', type=int, default=102, help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
-        parser.add_argument('--data_dir', type=str, default='../dataset/assist2017/cross_validation_data', help='data directory')
+        parser.add_argument('--data_dir', type=str, default='../dataset/assist2017/train_valid_test', help='data directory')
         parser.add_argument('--data_name', type=str, default='assist2017', help='data set name')
         parser.add_argument('--load', type=str, default='assist2017', help='model file to load')
         parser.add_argument('--save', type=str, default='assist2017', help='path to save model')
@@ -76,7 +76,7 @@ def main():
         parser.add_argument('--n_question', type=int, default=50,
                             help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
-        parser.add_argument('--data_dir', type=str, default='../dataset/synthetic/cross_validation_data', help='data directory')
+        parser.add_argument('--data_dir', type=str, default='../dataset/synthetic', help='data directory')
         parser.add_argument('--data_name', type=str, default='synthetic', help='data set name')
         parser.add_argument('--load', type=str, default='synthetic', help='model file to load')
         parser.add_argument('--save', type=str, default='synthetic', help='path to save model')
