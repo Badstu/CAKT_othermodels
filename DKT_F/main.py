@@ -76,7 +76,7 @@ def main():
         parser.add_argument('--n_question', type=int, default=102,
                             help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
-        parser.add_argument('--data_dir', type=str, default='./data/assist2017', help='data directory')
+        parser.add_argument('--data_dir', type=str, default='./data/assist2017/train_valid_test', help='data directory')
         parser.add_argument('--data_name', type=str, default='assist2017', help='data set name')
         parser.add_argument('--load', type=str, default='assist2017', help='model file to load')
         parser.add_argument('--save', type=str, default='assist2017', help='path to save model')
@@ -96,9 +96,12 @@ def main():
         valid_data_path = params.data_dir + "/" + "naive_c5_q50_s4000_v0_valid1.csv"
         test_data_path = params.data_dir + "/" + "naive_c5_q50_s4000_v0_test.csv"
 
-    train_q_data, train_q_t_data, train_answer_data, train_repeated_time_gap, train_past_trail_counts, train_seq_time_gap = dat.load_data(train_data_path)
-    valid_q_data, valid_q_t_data, valid_answer_data, valid_repeated_time_gap, valid_past_trail_counts, valid_seq_time_gap  = dat.load_data(valid_data_path)
-    test_q_data, test_q_t_data, test_answer_data, test_repeated_time_gap, test_past_trail_counts, test_seq_time_gap = dat.load_data(test_data_path)
+    train_q_data, train_q_t_data, train_answer_data, train_repeated_time_gap, train_past_trail_counts,\
+    train_seq_time_gap = dat.load_data(train_data_path)
+    valid_q_data, valid_q_t_data, valid_answer_data, valid_repeated_time_gap, valid_past_trail_counts,\
+    valid_seq_time_gap  = dat.load_data(valid_data_path)
+    test_q_data, test_q_t_data, test_answer_data, test_repeated_time_gap, test_past_trail_counts,\
+    test_seq_time_gap = dat.load_data(test_data_path)
 
     model = MODEL(batch_size=params.batch_size,
                   seqlen=params.seqlen,
@@ -117,24 +120,27 @@ def main():
         torch.cuda.set_device(params.gpu)
         model.cuda()
 
-    all_train_loss = {}
-    all_train_accuracy = {}
-    all_train_auc = {}
-    all_valid_loss = {}
-    all_valid_accuracy = {}
-    all_valid_auc = {}
-    all_test_loss = {}
-    all_test_accuracy = {}
-    all_test_auc = {}
+    # all_train_loss = {}
+    # all_train_accuracy = {}
+    # all_train_auc = {}
+    # all_valid_loss = {}
+    # all_valid_accuracy = {}
+    # all_valid_auc = {}
+    # all_test_loss = {}
+    # all_test_accuracy = {}
+    # all_test_auc = {}
     best_valid_auc = 0
+    cur_test_auc = 0
 
     for idx in range(params.max_iter):
         train_loss, train_accuracy, train_auc = train(model, params, optimizer, train_q_data, train_q_t_data,
-                                                      train_answer_data, train_repeated_time_gap, train_past_trail_counts, train_seq_time_gap)
+                                                      train_answer_data, train_repeated_time_gap,\
+                                                      train_past_trail_counts, train_seq_time_gap)
         print('Epoch %d/%d, loss : %3.5f, auc : %3.5f, accuracy : %3.5f' % (
             idx + 1, params.max_iter, train_loss, train_auc, train_accuracy))
         valid_loss, valid_accuracy, valid_auc = test(model, params, optimizer, valid_q_data, valid_q_t_data,
-                                                     valid_answer_data, valid_repeated_time_gap, valid_past_trail_counts, valid_seq_time_gap)
+                                                     valid_answer_data, valid_repeated_time_gap,\
+                                                     valid_past_trail_counts, valid_seq_time_gap)
         print('Epoch %d/%d, valid auc : %3.5f, valid accuracy : %3.5f' % (
             idx + 1, params.max_iter, valid_auc, valid_accuracy))
         test_loss, test_accuracy, test_auc = test(model, params, optimizer, test_q_data, test_q_t_data,
@@ -143,19 +149,23 @@ def main():
         print('Epoch %d/%d, test auc : %3.5f, test accuracy : %3.5f' % (
             idx + 1, params.max_iter, test_auc, test_accuracy))
 
-        all_train_auc[idx + 1] = train_auc
-        all_train_accuracy[idx + 1] = train_accuracy
-        all_train_loss[idx + 1] = train_loss
-        all_valid_loss[idx + 1] = valid_loss
-        all_valid_accuracy[idx + 1] = valid_accuracy
-        all_valid_auc[idx + 1] = valid_auc
-        all_test_loss[idx + 1] = test_loss
-        all_test_accuracy[idx + 1] = test_accuracy
-        all_test_auc[idx + 1] = test_auc
+        # all_train_auc[idx + 1] = train_auc
+        # all_train_accuracy[idx + 1] = train_accuracy
+        # all_train_loss[idx + 1] = train_loss
+        # all_valid_loss[idx + 1] = valid_loss
+        # all_valid_accuracy[idx + 1] = valid_accuracy
+        # all_valid_auc[idx + 1] = valid_auc
+        # all_test_loss[idx + 1] = test_loss
+        # all_test_accuracy[idx + 1] = test_accuracy
+        # all_test_auc[idx + 1] = test_auc
 
         if valid_auc > best_valid_auc:
             print('%3.4f to %3.4f' % (best_valid_auc, valid_auc))
             best_valid_auc = valid_auc
+            cur_test_auc = test_auc
+
+    print('DATASET: {}_{}, BEST VALID AUC: {}, TEST AUC: {}'.format(params.data_name, params.train_set,\
+                                                                    best_valid_auc, cur_test_auc))
 
 
 if __name__ == "__main__":
