@@ -1,13 +1,15 @@
 import numpy as np
 import math
+from tqdm import tqdm
 
 class DATA(object):
-    def __init__(self, n_question, seqlen, separate_char, name="data"):
+    def __init__(self, n_question, seqlen, separate_char, batch_size, name="data"):
         # In the ASSISTments2009 dataset:
         # param: n_queation = 110
         #        seqlen = 200
         self.separate_char = separate_char
         self.n_question = n_question
+        self.batch_size = batch_size
         """
         self.seqlen = seqlen+1
         """
@@ -89,4 +91,35 @@ class DATA(object):
 
         # return q_a_dataArray, q_target_dataArray, answer_dataArray
 
-        return q_a_data, q_target_data, answer_data
+        seq_len = []
+        for i in range(len(q_a_data)):
+            seq_len.append(len(q_a_data[i]))
+
+        all_q_a_data = []
+        all_q_target_data = []
+        all_answer_data = []
+
+        for i in tqdm(range(int(math.floor(len(q_a_data) / self.batch_size)))):
+            max_len = max(seq_len[i * self.batch_size: (i + 1) * self.batch_size])
+
+            q_a_seq = q_a_data[i * self.batch_size: (i + 1) * self.batch_size]
+            q_target_seq = q_target_data[i * self.batch_size: (i + 1) * self.batch_size]
+            answer_seq = answer_data[i * self.batch_size: (i + 1) * self.batch_size]
+
+            q_a_dataArray = np.zeros((self.batch_size, max_len))
+            q_target_dataArray = np.zeros((self.batch_size, max_len))
+            answer_dataArray = np.zeros((self.batch_size, max_len))
+            for j in range(self.batch_size):
+                dat = q_a_seq[j]
+                q_a_dataArray[j, :len(dat)] = dat
+                all_q_a_data.append(q_a_dataArray)
+
+                q_target_dat = q_target_seq[j]
+                q_target_dataArray[j, :len(q_target_dat)] = q_target_dat
+                all_q_target_data.append(q_target_dataArray)
+
+                answer_dat = answer_seq[j]
+                answer_dataArray[j, :len(answer_dat)] = answer_dat
+                all_answer_data.append(answer_dataArray)
+
+        return all_q_a_data, all_q_target_data, all_answer_data

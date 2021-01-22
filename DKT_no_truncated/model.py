@@ -59,11 +59,12 @@ class MODEL(nn.Module):
 
         prediction_1d = torch.cat([prediction_slice[i][:, q_t_data[i]] for i in range(batch_size * seqlen)], 0)
 
-        target_1d = target  # [batch_size * seq_len, 1]
+        target_1d = target # [batch_size * seq_len, 1]
 
         filtered_pred = torch.masked_select(prediction_1d, mask)
         # filtered_pred = torch.sigmoid(filtered_pred)
         filtered_target = torch.masked_select(target_1d, mask)
-        loss = torch.nn.functional.binary_cross_entropy_with_logits(filtered_pred, filtered_target)
+        filtered_pred = torch.sigmoid(filtered_pred)
 
-        return loss, torch.sigmoid(filtered_pred), filtered_target
+        # loss = torch.nn.functional.binary_cross_entropy_with_logits(filtered_pred, filtered_target)
+        return filtered_pred, filtered_target

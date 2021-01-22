@@ -86,7 +86,7 @@ def main():
 
     print(params)
 
-    dat = DATA(n_question=params.n_question, seqlen=params.seqlen, separate_char=',')
+    dat = DATA(n_question=params.n_question, seqlen=params.seqlen, separate_char=',', batch_size=params.batch_size)
     if params.dataset != 'synthetic':
         train_data_path = params.data_dir + "/" + params.data_name + "_train" + str(params.train_set) + ".csv"
         valid_data_path = params.data_dir + "/" + params.data_name + "_valid" + str(params.train_set) + ".csv"

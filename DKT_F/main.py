@@ -8,7 +8,7 @@ from run import train, test
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gpu', type=int, default=0)
+    parser.add_argument('--gpu', type=int, default=-1)
     parser.add_argument('--max_iter', type=int, default=300, help='number of iterations')
     parser.add_argument('--decay_epoch', type=int, default=20, help='number of iterations')
     parser.add_argument('--test', type=bool, default=False, help='enable testing')
@@ -33,7 +33,7 @@ def main():
         # parser.add_argument('--qa_embed_dim', type=int, default=200, help='answer and question embedding dimensions')
         parser.add_argument('--n_question', type=int, default=110, help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
-        parser.add_argument('--data_dir', type=str, default='./data/assist2009_updated', help='data directory')
+        parser.add_argument('--data_dir', type=str, default='../dataset/assist2009_updated', help='data directory')
         parser.add_argument('--data_name', type=str, default='assist2009_updated', help='data set name')
         parser.add_argument('--load', type=str, default='assist2009_updated', help='model file to load')
         parser.add_argument('--save', type=str, default='assist2009_updated', help='path to save model')
@@ -43,7 +43,7 @@ def main():
         # parser.add_argument('--qa_embed_dim', type=int, default=200, help='answer and question embedding dimensions')
         parser.add_argument('--n_question', type=int, default=100, help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
-        parser.add_argument('--data_dir', type=str, default='./data/assist2015', help='data directory')
+        parser.add_argument('--data_dir', type=str, default='../dataset/assist2015', help='data directory')
         parser.add_argument('--data_name', type=str, default='assist2015', help='data set name')
         parser.add_argument('--load', type=str, default='assist2015', help='model file to load')
         parser.add_argument('--save', type=str, default='assist2015', help='path to save model')
@@ -54,7 +54,7 @@ def main():
         parser.add_argument('--n_question', type=int, default=1223,
                             help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
-        parser.add_argument('--data_dir', type=str, default='./data/STATICS', help='data directory')
+        parser.add_argument('--data_dir', type=str, default='../dataset/STATICS', help='data directory')
         parser.add_argument('--data_name', type=str, default='STATICS', help='data set name')
         parser.add_argument('--load', type=str, default='STATICS', help='model file to load')
         parser.add_argument('--save', type=str, default='STATICS', help='path to save model')
@@ -65,7 +65,7 @@ def main():
         parser.add_argument('--n_question', type=int, default=50,
                             help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
-        parser.add_argument('--data_dir', type=str, default='./data/synthetic', help='data directory')
+        parser.add_argument('--data_dir', type=str, default='../dataset/synthetic', help='data directory')
         parser.add_argument('--data_name', type=str, default='synthetic', help='data set name')
         parser.add_argument('--load', type=str, default='synthetic', help='model file to load')
         parser.add_argument('--save', type=str, default='synthetic', help='path to save model')
@@ -76,7 +76,7 @@ def main():
         parser.add_argument('--n_question', type=int, default=102,
                             help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
-        parser.add_argument('--data_dir', type=str, default='./data/assist2017/train_valid_test', help='data directory')
+        parser.add_argument('--data_dir', type=str, default='../dataset/assist2017/train_valid_test', help='data directory')
         parser.add_argument('--data_name', type=str, default='assist2017', help='data set name')
         parser.add_argument('--load', type=str, default='assist2017', help='model file to load')
         parser.add_argument('--save', type=str, default='assist2017', help='path to save model')
