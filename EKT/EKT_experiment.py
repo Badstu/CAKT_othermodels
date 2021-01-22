@@ -35,18 +35,22 @@ def init_loss_file(opt):
 
 
 def main(**kwargs):
-    opt = Config()
 
-    if opt.data_source == 'assist2009_updated':
-        opt.num_concept = 110
-    elif opt.data_source == 'assist2015':
-        opt.num_concept = 100
-    elif opt.data_source == 'assist2017':
-        opt.num_concept = 102
-    elif opt.data_source == 'STATICS':
-        opt.num_concept = 1223
-    elif opt.data_source == 'synthetic':
-        opt.num_concept = 50
+    # if kwargs['data_source'] == 'assist2009_updated':
+    #     kwargs['num_concept'] = 110
+    # elif kwargs['data_source'] == 'assist2015':
+    #     kwargs['num_concept'] = 100
+    # elif kwargs['data_source'] == 'assist2017':
+    #     kwargs['num_concept'] = 102
+    # elif kwargs['data_source'] == 'STATICS':
+    #     kwargs['num_concept'] = 1223
+    # elif kwargs['data_source'] == 'synthetic':
+    #     kwargs['num_concept'] = 50
+    #
+    # kwargs['input_dim'] = 2 * kwargs['num_concept']
+    # kwargs['output_dim'] = kwargs['num_concept']
+
+    opt = Config()
 
     for k_, v_ in kwargs.items():
         setattr(opt, k_, v_)
@@ -174,8 +178,8 @@ if __name__ == '__main__':
                 is_text=True,
                 output_dim = num_concept,
                 input_dim = 2 * num_concept,
-                lr=1e-7,
-                lr_decay=0.3,
+                lr=0.001,
+                lr_decay=1,
                 weight_decay=0,
                 hidden_dim=200,
                 embed_dim=200,
