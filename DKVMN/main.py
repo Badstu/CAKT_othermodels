@@ -152,7 +152,8 @@ def main():
             correspond_train_auc = train_auc
             correspond_test_auc = test_auc
 
-    print('DATASET: {}, BEST VALID AUC: {}, CORRESPOND TRAIN AUC: {}, CORRESPOND TEST AUC: {}'.format(params.data_name, best_valid_auc, correspond_train_auc, correspond_test_auc))
+    print("DATASET: {}, MEMO_SIZE: {}, Q_EMBED_SIZE: {}, QA_EMBED_SIZE: {}, LR: {}".format(params.data_name, params.memory_size, params.q_embed_dim, params.qa_embed_dim, params.init_lr))
+    print("BEST VALID AUC: {}, CORRESPOND TRAIN AUC: {}, CORRESPOND TEST AUC: {}".format(best_valid_auc, correspond_train_auc, correspond_test_auc))
 
 if __name__ == "__main__":
     main()
