@@ -107,7 +107,7 @@ parser.add_argument('--lr', default=0.001, type=float)
 parser.add_argument('--hidden_units', default=100, type=int)
 parser.add_argument('--batch_size', default=128, type=int)
 parser.add_argument('--num_blocks', default=1, type=int)
-parser.add_argument('--num_epochs', default=30, type=int)
+parser.add_argument('--num_epochs', default=100, type=int)
 parser.add_argument('--dropout_rate', default=0.2, type=float)
 parser.add_argument('--l2_emb', default=0.0, type=float)
 parser.add_argument('--num_skills', default=50, type=int)
@@ -133,9 +133,10 @@ else:
 if args.dataset in ['assist2017', 'STATICS']:
     args.batch_size = 32
 
-print(args.train_data_path)
-print(args.valid_data_path)
-print(args.test_data_path)
+print(args)
+# print(args.train_data_path)
+# print(args.valid_data_path)
+# print(args.test_data_path)
 
 train_students, valid_students, max_num_problems, max_skill_num = read_data_from_csv_file(
     args.train_data_path, args.valid_data_path, args.num_steps)
@@ -249,12 +250,12 @@ for epoch in range(1, args.num_epochs + 1):
         # st = str(auc)
         # st2 = str(rmse)
 
-        print("Epoch: %d Train Metrics:\n  train_auc: %.5f \n" % (epoch + 1, auc))
+        print("Epoch: %d Train Metrics:\n  train_auc: %.5f" % (epoch + 1, auc))
         
         valid_rmse, valid_auc = run_epoch(sess, mtest, valid_students, epoch, tf.no_op(), is_training=False)
-        print("Epoch: %d Valid Metrics:\n  valid_auc: %.5f \n" % (epoch + 1, valid_auc))
+        print("Epoch: %d Valid Metrics:\n  valid_auc: %.5f" % (epoch + 1, valid_auc))
         test_rmse, test_auc = run_epoch(sess, mtest, test_students, epoch, tf.no_op(), is_training=False)
-        print("Epoch: %d Test Metrics:\n  \t test_auc: %.5f \n" % (epoch + 1, test_auc))
+        print("Epoch: %d Test Metrics:\n  test_auc: %.5f" % (epoch + 1, test_auc))
 
         if valid_auc > best_valid_auc:
             best_valid_auc = valid_auc
