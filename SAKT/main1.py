@@ -102,14 +102,12 @@ def read_data_from_csv_file(fileName_train, fileName_test, max_num_problems):
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default='synthetic', type=str)
 parser.add_argument('--train_set', type=int, default=1)
-parser.add_argument('--train_data_path', default="data/assist2009_updated/assist2009_updated_train1.csv", type=str)
-parser.add_argument('--test_data_path', default="data/assist2009_updated/assist2009_updated_test1.csv", type=str)
-parser.add_argument('--batch_size', default=32, type=int)
+parser.add_argument('--num_heads', default=2, type=int)
 parser.add_argument('--lr', default=0.001, type=float)
 parser.add_argument('--hidden_units', default=100, type=int)
+parser.add_argument('--batch_size', default=128, type=int)
 parser.add_argument('--num_blocks', default=1, type=int)
-parser.add_argument('--num_epochs', default=30, type=int)
-parser.add_argument('--num_heads', default=2, type=int)
+parser.add_argument('--num_epochs', default=100, type=int)
 parser.add_argument('--dropout_rate', default=0.2, type=float)
 parser.add_argument('--l2_emb', default=0.0, type=float)
 parser.add_argument('--num_skills', default=50, type=int)
@@ -118,25 +116,33 @@ parser.add_argument('--pos', default=False, type=bool)
 parser.add_argument('--first_k', default=8, type=int)
 
 args = parser.parse_args()
-model_name = "/home/pande103/2016-EDM-master/DKT"
+# model_name = "/home/pande103/2016-EDM-master/DKT"
 if args.dataset == 'assist2017':
-    args.train_data_path = "../dataset/" + args.dataset + "/cross_validation_data/" + args.dataset + "_train" + str(args.train_set) + ".csv"
-    args.test_data_path = "../dataset/" + args.dataset + "/cross_validation_data/" + args.dataset + "_valid" + str(args.train_set) + ".csv"
+    args.train_data_path = "../dataset/" + args.dataset + "/train_valid_test/assist2017_train" + str(args.train_set) + ".csv"
+    args.valid_data_path = "../dataset/" + args.dataset + "/train_valid_test/assist2017_valid" + str(args.train_set) + ".csv"
+    args.test_data_path = "../dataset/" + args.dataset + "/train_valid_test/assist2017_test.csv"
 elif args.dataset == 'synthetic':
-    args.train_data_path = "../dataset/synthetic/cross_validation_data/naive_c5_q50_s4000_v0_train" + str(args.train_set) + ".csv"
-    args.test_data_path = "../dataset/synthetic/cross_validation_data/naive_c5_q50_s4000_v0_valid" + str(args.train_set) + ".csv"
-    # args.train_data_path = "./data/synthetic/naive_c5_q50_s4000_v0_train.csv"
-    # args.test_data_path = "./data/synthetic/naive_c5_q50_s4000_v0_test.csv"
+    args.train_data_path = "../dataset/synthetic/naive_c5_q50_s4000_v0_train" + str(args.train_set) + ".csv"
+    args.valid_data_path = "../dataset/synthetic/naive_c5_q50_s4000_v0_valid" + str(args.train_set) + ".csv"
+    args.test_data_path = "../dataset/synthetic/naive_c5_q50_s4000_v0_test.csv"
 else:
     args.train_data_path = "../dataset/" + args.dataset + "/" + args.dataset + "_train" + str(args.train_set) + ".csv"
-    args.test_data_path = "../dataset/" + args.dataset + "/" + args.dataset + "_valid" + str(args.train_set) + ".csv"
+    args.valid_data_path = "../dataset/" + args.dataset + "/" + args.dataset + "_valid" + str(args.train_set) + ".csv"
+    args.test_data_path = "../dataset/" + args.dataset + "/" + args.dataset + "_test.csv"
 
-print(args.train_data_path)
-print(args.test_data_path)
+if args.dataset in ['assist2017', 'STATICS']:
+    args.batch_size = 32
 
-train_students, test_students, max_num_problems, max_skill_num = read_data_from_csv_file(args.train_data_path,
-                                                                                         args.test_data_path,
-                                                                                         args.num_steps)
+print(args)
+# print(args.train_data_path)
+# print(args.valid_data_path)
+# print(args.test_data_path)
+
+train_students, valid_students, max_num_problems, max_skill_num = read_data_from_csv_file(
+    args.train_data_path, args.valid_data_path, args.num_steps)
+_, test_students, _, max_sn = read_data_from_csv_file(
+    args.test_data_path, args.test_data_path, args.num_steps)
+max_skill_num = max(max_skill_num, max_sn)
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -150,7 +156,7 @@ sess = tf.Session(config=config)
 # training model
 with tf.variable_scope("model", reuse=None):
     m = Model(True, args)
-    # testing model
+# testing model
 with tf.variable_scope("model", reuse=True):
     mtest = Model(False, args, reuse=True)  # testing model
 # mtest = Model(test_students, False, args)
@@ -234,27 +240,27 @@ def run_epoch(session, m, students, epoch, eval_op, verbose=False, is_training=T
 num_batch = len(train_students) / args.batch_size
 # f_log = open("auc" + "_" + args.dataset + "_" + str(args.hidden_units) + "_" + str(args.num_heads) + "_" + str(
 #     args.num_steps) + "_" + str(args.num_blocks) + ".csv", 'w+')
-max_auc = 0
+best_valid_auc = 0
+correspond_train_auc = 0
+correspond_test_auc = 0
 for epoch in range(1, args.num_epochs + 1):
-
     rmse, auc = run_epoch(sess, m, train_students, epoch, m.train_op, verbose=True, is_training=True)
 
     if epoch % 5 == 0:
-        st = str(auc)
-        st2 = str(rmse)
+        # st = str(auc)
+        # st2 = str(rmse)
 
-        t1 = time.time() - t0
-        T += t1
-        print("Epoch: %d Train Metrics:\n  auc: %.3f \n" % (epoch + 1, auc))
-        rmse, auc = run_epoch(sess, mtest, test_students, epoch, tf.no_op(), is_training=False)
-        print("Epoch: %d Test Metrics:\n  \t auc: %.3f \n" % (epoch + 1, auc))
+        print("Epoch: %d Train Metrics:\n  train_auc: %.5f" % (epoch + 1, auc))
+        
+        valid_rmse, valid_auc = run_epoch(sess, mtest, valid_students, epoch, tf.no_op(), is_training=False)
+        print("Epoch: %d Valid Metrics:\n  valid_auc: %.5f" % (epoch + 1, valid_auc))
+        test_rmse, test_auc = run_epoch(sess, mtest, test_students, epoch, tf.no_op(), is_training=False)
+        print("Epoch: %d Test Metrics:\n  test_auc: %.5f" % (epoch + 1, test_auc))
 
-        if auc > max_auc:    
-            # f_log.write(st + "," + str(auc) + "\n")
-            max_auc = auc
-        t0 = time.time()
+        if valid_auc > best_valid_auc:
+            best_valid_auc = valid_auc
+            correspond_train_auc = auc
+            correspond_test_auc = test_auc
 
-print("DATASET:{}_{}, BEST AUC:{}".format(args.dataset, args.train_set, max_auc))
-# np.save("weights" + args.dataset + "_" + str(args.hidden_units) + "with_pos.npy", weights)
-print(len(label_actual_arr))
-print("Done")
+print("DATASET: {}, NUM_HEADS: {}, HIDDEN_UNITS: {}, LR: {}".format(args.dataset, args.num_heads, args.hidden_units, args.lr))
+print("BEST VALID AUC: {}, CORRESPOND TRAIN AUC: {}, CORRESPOND TEST AUC: {}".format(best_valid_auc, correspond_train_auc, correspond_test_auc))
