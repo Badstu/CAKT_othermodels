@@ -143,7 +143,7 @@ def main():
         valid_loss, valid_accuracy, valid_auc = test(model, params, optimizer, valid_q_data, valid_qa_data)
         print('Epoch %d/%d, valid auc : %3.5f, valid accuracy : %3.5f' % (idx + 1, params.max_iter, valid_auc, valid_accuracy))
         test_loss, test_accuracy, test_auc = test(model, params, optimizer, test_q_data, test_qa_data)
-        print('Epoch %d/%d, valid auc : %3.5f, valid accuracy : %3.5f' % (idx + 1, params.max_iter, test_auc, test_accuracy))
+        print('Epoch %d/%d, test auc : %3.5f, test accuracy : %3.5f' % (idx + 1, params.max_iter, test_auc, test_accuracy))
 
         # output the epoch with the best validation auc
         if valid_auc > best_valid_auc:
