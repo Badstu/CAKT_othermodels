@@ -5,6 +5,8 @@ import time
 from memory import DKVMN
 import numpy
 from itertools import zip_longest
+import warnings
+warnings.filterwarnings("ignore")
 
 class MODEL(nn.Module):
 
