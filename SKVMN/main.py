@@ -71,7 +71,7 @@ def main():
         # memory_size: 50, q_embed_dim: 50, qa_embed_dim: 100
         parser.add_argument('--batch_size', type=int, default=32, help='the batch size')
         parser.add_argument('--n_question', type=int, default=1223, help='the number of unique questions in the dataset')
-        parser.add_argument('--seqlen', type=int, default=6, help='the allowed maximum length of a sequence')
+        parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
         parser.add_argument('--data_dir', type=str, default='../dataset/STATICS', help='data directory')
         parser.add_argument('--data_name', type=str, default='STATICS', help='data set name')
         parser.add_argument('--load', type=str, default='STATICS', help='model file to load')
