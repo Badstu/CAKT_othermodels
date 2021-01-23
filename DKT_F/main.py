@@ -26,6 +26,7 @@ def main():
     parser.add_argument('--dataset', type=str, default='assist2009_updated')
     parser.add_argument('--batch_size', type=int, default=32, help='the batch size')
     parser.add_argument('--qa_embed_dim', type=int, default=200, help='answer and question embedding dimensions')
+    parser.add_argument('--dropout_rate', type=float, default=0.6)
 
 
     if parser.parse_args().dataset == 'assist2009_updated':
@@ -109,6 +110,7 @@ def main():
                   hidden_dim=params.hidden_dim,
                   x_embed_dim=params.qa_embed_dim,
                   hidden_layers=params.n_hidden,
+                  dropout_rate=params.dropout_rate,
                   gpu=params.gpu)
 
     model.init_embeddings()
@@ -131,6 +133,7 @@ def main():
     # all_test_auc = {}
     best_valid_auc = 0
     cur_test_auc = 0
+    cur_train_auc = 0
 
     for idx in range(params.max_iter):
         train_loss, train_accuracy, train_auc = train(model, params, optimizer, train_q_data, train_q_t_data,
@@ -163,8 +166,10 @@ def main():
             print('%3.4f to %3.4f' % (best_valid_auc, valid_auc))
             best_valid_auc = valid_auc
             cur_test_auc = test_auc
+            cur_train_auc = train_auc
 
-    print('DATASET: {}, BEST VALID AUC: {}, TEST AUC: {}'.format(params.data_name, best_valid_auc, cur_test_auc))
+    print('DATASET: {}, TRAIN AUC: {}, BEST VALID AUC: {}, TEST AUC: {}'.format(params.data_name, cur_train_auc, \
+                                                                                best_valid_auc, cur_test_auc))
 
 
 if __name__ == "__main__":
