@@ -8,8 +8,8 @@ from run import train, test
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gpu', type=int, default=-1)
-    parser.add_argument('--max_iter', type=int, default=300, help='number of iterations')
+    parser.add_argument('--gpu', type=int, default=0)
+    parser.add_argument('--max_iter', type=int, default=30, help='number of iterations')
     parser.add_argument('--decay_epoch', type=int, default=20, help='number of iterations')
     parser.add_argument('--test', type=bool, default=False, help='enable testing')
     parser.add_argument('--train_test', type=bool, default=True, help='enable testing')
@@ -164,8 +164,7 @@ def main():
             best_valid_auc = valid_auc
             cur_test_auc = test_auc
 
-    print('DATASET: {}_{}, BEST VALID AUC: {}, TEST AUC: {}'.format(params.data_name, params.train_set,\
-                                                                    best_valid_auc, cur_test_auc))
+    print('DATASET: {}, BEST VALID AUC: {}, TEST AUC: {}'.format(params.data_name, best_valid_auc, cur_test_auc))
 
 
 if __name__ == "__main__":
