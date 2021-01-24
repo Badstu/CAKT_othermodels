@@ -40,12 +40,13 @@ if TRAIN_OR_RESTORE == 'R':
 
 # 输入修改
 # name = 'assist2009_updated'
-# number = '1'
 name = str(sys.argv[1])
-number = str(sys.argv[2])
-hidden_size = int(sys.argv[3])
-dropout_prob = float(sys.argv[4])
-lr = float(sys.argv[5])
+# number = str(sys.argv[2])
+number = '1'
+hidden_size = int(sys.argv[2])
+dropout_prob = float(sys.argv[3])
+lr = float(sys.argv[4])
+logger.info("DATASET: {}, HIDDEN_SIZE: {}, DROPOUT_PROB: {}, LR: {}".format(name, hidden_size, dropout_prob, lr))
 
 tf.flags.DEFINE_string("train_or_restore", TRAIN_OR_RESTORE, "Train or Restore.")
 tf.flags.DEFINE_float("learning_rate", lr, "Learning rate")

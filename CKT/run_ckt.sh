@@ -1,25 +1,54 @@
-# python train.py assist2009_updated 1
-# python train.py assist2009_updated 2
-# python train.py assist2009_updated 3
-# python train.py assist2009_updated 4
-# python train.py assist2009_updated 5
-# python train.py assist2015 1
-# python train.py assist2015 2
-# python train.py assist2015 3
-# python train.py assist2015 4
-# python train.py assist2015 5
-# python train.py assist2017 1
-# python train.py assist2017 2
-# python train.py assist2017 3
-# python train.py assist2017 4
-# python train.py assist2017 5
-# python train.py STATICS 1
-# python train.py STATICS 2
-# python train.py STATICS 3
-# python train.py STATICS 4
-# python train.py STATICS 5
-python train.py synthetic 1
-python train.py synthetic 2
-python train.py synthetic 3
-python train.py synthetic 4
-python train.py synthetic 5
+python train.py assist2009_updated 50 0.2 1e-2
+python train.py assist2009_updated 50 0.4 1e-3
+python train.py assist2009_updated 50 0.4 1e-4
+python train.py assist2009_updated 50 0.6 1e-3
+python train.py assist2009_updated 100 0.2 1e-2
+python train.py assist2009_updated 100 0.4 1e-3
+python train.py assist2009_updated 100 0.6 1e-4
+python train.py assist2009_updated 150 0.2 1e-4
+python train.py assist2009_updated 150 0.4 1e-3
+python train.py assist2009_updated 150 0.6 1e-3
+
+# python train.py assist2015 50 0.2 1e-2
+# python train.py assist2015 50 0.4 1e-3
+# python train.py assist2015 50 0.4 1e-4
+# python train.py assist2015 50 0.6 1e-3
+# python train.py assist2015 100 0.2 1e-2
+# python train.py assist2015 100 0.4 1e-3
+# python train.py assist2015 100 0.6 1e-4
+# python train.py assist2015 150 0.2 1e-4
+# python train.py assist2015 150 0.4 1e-3
+# python train.py assist2015 150 0.6 1e-3
+
+# python train.py assist2017 50 0.2 1e-2
+# python train.py assist2017 50 0.4 1e-3
+# python train.py assist2017 50 0.4 1e-4
+# python train.py assist2017 50 0.6 1e-3
+# python train.py assist2017 100 0.2 1e-2
+# python train.py assist2017 100 0.4 1e-3
+# python train.py assist2017 100 0.6 1e-4
+# python train.py assist2017 150 0.2 1e-4
+# python train.py assist2017 150 0.4 1e-3
+# python train.py assist2017 150 0.6 1e-3
+
+# python train.py STATICS 50 0.2 1e-2
+# python train.py STATICS 50 0.4 1e-3
+# python train.py STATICS 50 0.4 1e-4
+# python train.py STATICS 50 0.6 1e-3
+# python train.py STATICS 100 0.2 1e-2
+# python train.py STATICS 100 0.4 1e-3
+# python train.py STATICS 100 0.6 1e-4
+# python train.py STATICS 150 0.2 1e-4
+# python train.py STATICS 150 0.4 1e-3
+# python train.py STATICS 150 0.6 1e-3
+
+# python train.py synthetic 50 0.2 1e-2
+# python train.py synthetic 50 0.4 1e-3
+# python train.py synthetic 50 0.4 1e-4
+# python train.py synthetic 50 0.6 1e-3
+# python train.py synthetic 100 0.2 1e-2
+# python train.py synthetic 100 0.4 1e-3
+# python train.py synthetic 100 0.6 1e-4
+# python train.py synthetic 150 0.2 1e-4
+# python train.py synthetic 150 0.4 1e-3
+# python train.py synthetic 150 0.6 1e-3
