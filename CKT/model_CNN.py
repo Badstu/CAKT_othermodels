@@ -33,11 +33,11 @@ class CKT(object):
 
        # input_data = tf.cast(self.input_data, tf.float32)
 
-        skill_w = tf.Variable(tf.contrib.layers.xavier_initializer()([num_skills,100]),dtype=tf.float32, trainable=True)
+        skill_w = tf.Variable(tf.contrib.layers.xavier_initializer()([num_skills,self.hidden_size]),dtype=tf.float32, trainable=True)
         skills = tf.nn.embedding_lookup(skill_w, self.input_skill)
         next_skill = tf.nn.embedding_lookup(skill_w, self.next_id)
 
-        zeros = tf.zeros([num_skills,100])
+        zeros = tf.zeros([num_skills,self.hidden_size])
         t1 = tf.concat([skill_w,zeros],axis = -1)
         t2 = tf.concat([zeros,skill_w],axis = -1)
         input_w = tf.concat([t1,t2],axis = 0)
