@@ -40,28 +40,35 @@ if TRAIN_OR_RESTORE == 'R':
 
 # 输入修改
 # name = 'assist2009_updated'
-# number = '1'
 name = str(sys.argv[1])
-number = str(sys.argv[2])
+# number = str(sys.argv[2])
+number = '1'
+hidden_size = int(sys.argv[2])
+dropout_prob = float(sys.argv[3])
+lr = float(sys.argv[4])
+logger.info("DATASET: {}, HIDDEN_SIZE: {}, DROPOUT_PROB: {}, LR: {}".format(name, hidden_size, dropout_prob, lr))
 
 tf.flags.DEFINE_string("train_or_restore", TRAIN_OR_RESTORE, "Train or Restore.")
-tf.flags.DEFINE_float("learning_rate", 0.001, "Learning rate")
+tf.flags.DEFINE_float("learning_rate", lr, "Learning rate")
 tf.flags.DEFINE_float("norm_ratio", 5, "The ratio of the sum of gradients norms of trainable variable (default: 1.25)")
-tf.flags.DEFINE_float("keep_prob", 0.2, "Keep probability for dropout")
-tf.flags.DEFINE_integer("hidden_size", 100, "The number of hidden nodes (Integer)")
+tf.flags.DEFINE_float("keep_prob", dropout_prob, "Keep probability for dropout")
+tf.flags.DEFINE_integer("hidden_size", hidden_size, "The number of hidden nodes (Integer)")
 tf.flags.DEFINE_integer("evaluation_interval", 1, "Evaluate and print results every x epochs")
 tf.flags.DEFINE_integer("batch_size", 50, "Batch size for training.")
 tf.flags.DEFINE_integer("epochs", 300, "Number of epochs to train for.")
 
 if name == 'synthetic':
-    tf.flags.DEFINE_string("train_data_path", '../dataset/synthetic/cross_validation_data/naive_c5_q50_s4000_v0_train'+ number +'.csv', "Path to the training dataset")
-    tf.flags.DEFINE_string("test_data_path", '../dataset/synthetic/cross_validation_data/naive_c5_q50_s4000_v0_valid'+ number +'.csv', "Path to the testing dataset")
+    tf.flags.DEFINE_string("train_data_path", '../dataset/synthetic/naive_c5_q50_s4000_v0_train'+ number +'.csv', "Path to the training dataset")
+    tf.flags.DEFINE_string("valid_data_path", '../dataset/synthetic/naive_c5_q50_s4000_v0_valid'+ number +'.csv', "Path to the validing dataset")
+    tf.flags.DEFINE_string("test_data_path", '../dataset/synthetic/naive_c5_q50_s4000_v0_test.csv', "Path to the testing dataset")
 elif name == 'assist2017':
-    tf.flags.DEFINE_string("train_data_path", '../dataset/assist2017/cross_validation_data/' + name + '_train' + number + '.csv', "Path to the training dataset")
-    tf.flags.DEFINE_string("test_data_path", '../dataset/assist2017/cross_validation_data/' + name + '_valid' + number + '.csv', "Path to the testing dataset")
+    tf.flags.DEFINE_string("train_data_path", '../dataset/assist2017/train_valid_test/' + name + '_train' + number + '.csv', "Path to the training dataset")
+    tf.flags.DEFINE_string("valid_data_path", '../dataset/assist2017/train_valid_test/' + name + '_valid' + number + '.csv', "Path to the validing dataset")
+    tf.flags.DEFINE_string("test_data_path", '../dataset/assist2017/train_valid_test/' + name + '_test.csv', "Path to the testing dataset")
 else:
     tf.flags.DEFINE_string("train_data_path", '../dataset/' + name + '/' + name + '_train' + number + '.csv', "Path to the training dataset")
-    tf.flags.DEFINE_string("test_data_path", '../dataset/' + name + '/' + name + '_valid' + number + '.csv', "Path to the testing dataset")
+    tf.flags.DEFINE_string("valid_data_path", '../dataset/' + name + '/' + name + '_valid' + number + '.csv', "Path to the validing dataset")
+    tf.flags.DEFINE_string("test_data_path", '../dataset/' + name + '/' + name + '_test.csv', "Path to the testing dataset")
 
 
 tf.flags.DEFINE_integer("decay_steps", 10, "how many steps before decay learning rate. (default: 500)")
@@ -101,9 +108,13 @@ def train():
     train_students, train_max_num_problems, train_max_skill_num = dh.read_data_from_csv_file(FLAGS.train_data_path)
     
     logger.info("Validation data processing...")
+    valid_students, valid_max_num_problems, valid_max_skill_num = dh.read_data_from_csv_file(FLAGS.valid_data_path)
+
+    logger.info("Testing data processing...")
     test_students, test_max_num_problems, test_max_skill_num = dh.read_data_from_csv_file(FLAGS.test_data_path)
-    max_num_steps = max(train_max_num_problems, test_max_num_problems)
-    max_num_skills = max(train_max_skill_num, test_max_skill_num)
+
+    max_num_steps = max(train_max_num_problems, valid_max_num_problems, test_max_num_problems)
+    max_num_skills = max(train_max_skill_num, valid_max_skill_num, test_max_skill_num)
     
     # Build a graph and lstm_3 object
     with tf.Graph().as_default():
@@ -169,7 +180,7 @@ def train():
             validation_summary_writer = tf.summary.FileWriter(validation_summary_dir, sess.graph)
 
             saver = tf.train.Saver(tf.global_variables(), max_to_keep=FLAGS.num_checkpoints)
-            best_saver = cm.BestCheckpointSaver(save_dir=best_checkpoint_dir, num_to_keep=3, maximize=True)
+            # best_saver = cm.BestCheckpointSaver(save_dir=best_checkpoint_dir, num_to_keep=3, maximize=True)
 
             if FLAGS.train_or_restore == 'R':
                 # Load ckt model
@@ -237,7 +248,9 @@ def train():
             m_rmse = 1
             m_r2 = 0
             m_acc = 0
-            m_auc = 0
+            best_valid_auc = 0
+            corr_train_auc = 0
+            corr_test_auc = 0
             for iii in range(FLAGS.epochs):
                 random.shuffle(train_students)
                 a=datetime.now()
@@ -294,20 +307,99 @@ def train():
                 run_time.append(e_time)
                 rmse = sqrt(mean_squared_error(actual_labels, pred_labels))
                 fpr, tpr, thresholds = metrics.roc_curve(actual_labels, pred_labels, pos_label=1)
-                auc = metrics.auc(fpr, tpr)
+                train_auc = metrics.auc(fpr, tpr)
                 #calculate r^2
                 r2 = r2_score(actual_labels, pred_labels)
                 pred_score = np.greater_equal(pred_labels,0.5) 
                 pred_score = pred_score.astype(int)
                 pred_score = np.equal(actual_labels, pred_score)
                 acc = np.mean(pred_score.astype(int))
-                logger.info("epochs {0}: rmse {1:g}  auc {2:g}  r2 {3:g}  acc{4:g} ".format((iii +1),rmse, auc, r2, acc))
-                with open('assist2009_train_auc', mode='a') as file:
-                    file.write('train {0}: auc {1:g} loss {2:g}'.format((iii +1), auc, overall_loss/count))
-                    file.write('\n')
+                logger.info("epochs {0}: rmse {1:g}  auc {2:g}  r2 {3:g}  acc{4:g} ".format((iii +1),rmse, train_auc, r2, acc))
+                # with open('assist2009_train_auc', mode='a') as file:
+                #     file.write('train {0}: auc {1:g} loss {2:g}'.format((iii +1), auc, overall_loss/count))
+                #     file.write('\n')
 
+                
                 if((iii+1) % FLAGS.evaluation_interval == 0):
-                    logger.info("\nEvaluation:")
+                    ################### validation start ######################
+                    logger.info("\nValidation:")
+                    
+                    data_size = len(valid_students)
+                    index = 0
+                    actual_labels = []
+                    pred_labels = []
+                    overall_loss = 0
+                    count = 0
+                    while(index+FLAGS.batch_size < data_size):
+                        x = np.zeros((FLAGS.batch_size, max_num_steps))
+                        xx = np.zeros((FLAGS.batch_size, max_num_steps))
+                        next_id = np.zeros((FLAGS.batch_size, max_num_steps))
+                        l = np.ones((FLAGS.batch_size, max_num_steps, max_num_skills))
+                        target_id = []
+                        target_correctness = []
+                        target_id2 = []
+                        target_correctness2 = []
+                        for i in range(FLAGS.batch_size):
+                            student = valid_students[index+i]
+                            problem_ids = student[1]
+                            correctness = student[2]
+                            correct_num = np.zeros(max_num_skills)
+                            answer_count = np.ones(max_num_skills)
+                            for j in range(len(problem_ids)-1):
+                                problem_id = int(problem_ids[j])
+                                
+                                if(int(correctness[j]) == 0):
+                                    x[i, j] = problem_id + max_num_skills
+                                else:
+                                    x[i, j] = problem_id
+                                    correct_num[problem_id] += 1
+                                l[i,j] = correct_num / answer_count
+                                answer_count[problem_id] += 1
+                                xx[i,j] = problem_id
+                                next_id[i,j] = int(problem_ids[j+1])
+                                target_id.append(i*max_num_steps+j)
+                                target_correctness.append(int(correctness[j+1]))
+                                actual_labels.append(int(correctness[j+1]))
+                            target_id2.append(i*max_num_steps+j)
+                            target_correctness2.append(int(correctness[j+1]))
+                            
+
+                        index += FLAGS.batch_size
+                        pred, loss = validation_step(x, xx, l, next_id, target_id, target_correctness, target_id2, target_correctness2)
+                        overall_loss += loss
+                        count += 1
+                        for p in pred:
+                            pred_labels.append(p)
+
+                    rmse = sqrt(mean_squared_error(actual_labels, pred_labels))
+                    fpr, tpr, thresholds = metrics.roc_curve(actual_labels, pred_labels, pos_label=1)
+                    valid_auc = metrics.auc(fpr, tpr)
+                    #calculate r^2
+                    r2 = r2_score(actual_labels, pred_labels)
+                    pred_score = np.greater_equal(pred_labels,0.5) 
+                    pred_score = pred_score.astype(int)
+                    pred_score = np.equal(actual_labels, pred_score)
+                    acc = np.mean(pred_score.astype(int))
+
+                    logger.info("VALIDATION {0}: rmse {1:g}  auc {2:g}  r2 {3:g}  acc{4:g} ".format((iii +1)/FLAGS.evaluation_interval, rmse, valid_auc, r2, acc))
+                    # with open('assist2009_valid_auc', mode='a') as file:
+                    #     file.write('validation {0}: auc {1:g} loss {2:g}'.format((iii + 1)/FLAGS.evaluation_interval, auc, overall_loss/count))
+                    #     file.write('\n')
+
+                    # if rmse < m_rmse:
+                    #     m_rmse = rmse
+                    # if valid_auc > best_valid_auc:
+                    #     best_valid_auc = valid_auc
+                    # if acc > m_acc:
+                    #     m_acc = acc
+                    # if r2 > m_r2:
+                    #     m_r2 = r2
+
+                    # best_saver.handle(auc, sess, current_step)
+                    ################### validation start ######################
+
+                    ################### testing start ######################
+                    logger.info("\nTesting:")
                     
                     data_size = len(test_students)
                     index = 0
@@ -354,11 +446,11 @@ def train():
                         overall_loss += loss
                         count += 1
                         for p in pred:
-                                pred_labels.append(p)
+                            pred_labels.append(p)
 
                     rmse = sqrt(mean_squared_error(actual_labels, pred_labels))
                     fpr, tpr, thresholds = metrics.roc_curve(actual_labels, pred_labels, pos_label=1)
-                    auc = metrics.auc(fpr, tpr)
+                    test_auc = metrics.auc(fpr, tpr)
                     #calculate r^2
                     r2 = r2_score(actual_labels, pred_labels)
                     pred_score = np.greater_equal(pred_labels,0.5) 
@@ -366,21 +458,20 @@ def train():
                     pred_score = np.equal(actual_labels, pred_score)
                     acc = np.mean(pred_score.astype(int))
 
-                    logger.info("VALIDATION {0}: rmse {1:g}  auc {2:g}  r2 {3:g}   acc{4:g} ".format((iii +1)/FLAGS.evaluation_interval, rmse, auc, r2, acc))
-                    with open('assist2009_valid_auc', mode='a') as file:
-                        file.write('validation {0}: auc {1:g} loss {2:g}'.format((iii + 1)/FLAGS.evaluation_interval, auc, overall_loss/count))
-                        file.write('\n')
+                    logger.info("TESTING {0}: rmse {1:g}  auc {2:g}  r2 {3:g}   acc{4:g} ".format((iii +1)/FLAGS.evaluation_interval, rmse, test_auc, r2, acc))
+                    # with open('assist2009_valid_auc', mode='a') as file:
+                    #     file.write('validation {0}: auc {1:g} loss {2:g}'.format((iii + 1)/FLAGS.evaluation_interval, auc, overall_loss/count))
+                    #     file.write('\n')
+                    # best_saver.handle(auc, sess, current_step)
+                    ################### testing end ######################
 
-                    if rmse < m_rmse:
-                        m_rmse = rmse
-                    if auc > m_auc:
-                        m_auc = auc
-                    if acc > m_acc:
-                        m_acc = acc
-                    if r2 > m_r2:
-                        m_r2 = r2
+                    ################### record best valid auc and correspond train test auc ######################
+                    if valid_auc > best_valid_auc:
+                        best_valid_auc = valid_auc
+                        corr_train_auc = train_auc
+                        corr_test_auc = test_auc
+                    #########################################
 
-                    best_saver.handle(auc, sess, current_step)
                 if ((iii+1) % FLAGS.checkpoint_every == 0) and False:
                     checkpoint_prefix = os.path.join(checkpoint_dir, "model")
                     path = saver.save(sess, checkpoint_prefix, global_step=current_step)
@@ -389,7 +480,7 @@ def train():
                 logger.info("Epoch {0} has finished!".format(iii + 1))
             
             logger.info("running time analysis: epoch{0}, avg_time{1}".format(len(run_time), np.mean(run_time)))
-            logger.info("best RESULT: rmse {0:g}  auc {1:g}  r2 {2:g}   acc{3:g} ".format(m_rmse, m_auc, m_r2, m_acc))
+            logger.info("BEST VALID AUC: {}, CORR TRAIN AUC: {}, CORR TEST AUC: {}".format(best_valid_auc, corr_train_auc, corr_test_auc))
     logger.info("Done.")
 
 
