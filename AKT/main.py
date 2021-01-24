@@ -14,7 +14,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # assert torch.cuda.is_available(), "No Cuda available, AssertionError"
 
-def train_one_dataset(params, file_name, train_q_data, train_qa_data, train_pid, valid_q_data, valid_qa_data, valid_pid):
+def train_one_dataset(params, file_name, train_q_data, train_qa_data, train_pid, valid_q_data,\
+                      valid_qa_data, valid_pid, test_q_data, test_qa_data, test_pid):
     # ================================== model initialization ==================================
 
     model = load_model(params)
@@ -23,11 +24,11 @@ def train_one_dataset(params, file_name, train_q_data, train_qa_data, train_pid,
 
     print("\n")
 
-    total_params = sum(p.numel() for p in model.parameters())
-    print(f'{total_params:,} total parameters.')
-    total_trainable_params = sum(
-        p.numel() for p in model.parameters() if p.requires_grad)
-    print(f'{total_trainable_params:,} training parameters.')
+    # total_params = sum(p.numel() for p in model.parameters())
+    # print(f'{total_params:,} total parameters.')
+    # total_trainable_params = sum(
+    #     p.numel() for p in model.parameters() if p.requires_grad)
+    # print(f'{total_trainable_params:,} training parameters.')
 
     # ================================== start training ==================================
     all_train_loss = {}
@@ -36,7 +37,12 @@ def train_one_dataset(params, file_name, train_q_data, train_qa_data, train_pid,
     all_valid_loss = {}
     all_valid_accuracy = {}
     all_valid_auc = {}
+    all_test_loss = {}
+    all_test_accuracy = {}
+    all_test_auc = {}
     best_valid_auc = 0
+    cur_train_auc = 0
+    cur_test_auc = 0
 
     for idx in range(params.max_iter):
         # Train Model
@@ -45,23 +51,29 @@ def train_one_dataset(params, file_name, train_q_data, train_qa_data, train_pid,
         # Validation step
         valid_loss, valid_accuracy, valid_auc = test(
             model,  params, optimizer, valid_q_data, valid_qa_data, valid_pid, label='Valid')
+        # Test step
+        test_loss, test_accuracy, test_auc = test(
+            model, params, optimizer, test_q_data, test_qa_data, test_pid, label='Test')
 
         print('epoch', idx + 1)
-        print("valid_auc\t", valid_auc, "\ttrain_auc\t", train_auc)
-        print("valid_accuracy\t", valid_accuracy,
-              "\ttrain_accuracy\t", train_accuracy)
-        print("valid_loss\t", valid_loss, "\ttrain_loss\t", train_loss)
+        print("\ttrain_auc\t", train_auc, "valid_auc\t", valid_auc, "\ttest_auc\t", test_auc)
+        print("\ttrain_accuracy\t", train_accuracy, "valid_accuracy\t", valid_accuracy,\
+              "\ttest_accuracy\t", test_accuracy)
+        print("\ttrain_loss\t", train_loss, "valid_loss\t", valid_loss, "test_loss\t", test_loss)
 
         try_makedirs('model')
         try_makedirs(os.path.join('model', params.model))
         try_makedirs(os.path.join('model', params.model, params.save))
 
-        all_valid_auc[idx + 1] = valid_auc
-        all_train_auc[idx + 1] = train_auc
-        all_valid_loss[idx + 1] = valid_loss
-        all_train_loss[idx + 1] = train_loss
-        all_valid_accuracy[idx + 1] = valid_accuracy
-        all_train_accuracy[idx + 1] = train_accuracy
+        # all_valid_auc[idx + 1] = valid_auc
+        # all_train_auc[idx + 1] = train_auc
+        # all_test_auc[idx + 1] = test_auc
+        # all_valid_loss[idx + 1] = valid_loss
+        # all_train_loss[idx + 1] = train_loss
+        # all_test_loss[idx + 1] = test_loss
+        # all_valid_accuracy[idx + 1] = valid_accuracy
+        # all_train_accuracy[idx + 1] = train_accuracy
+        # all_test_accuracy[idx + 1] = test_accuracy
 
         # output the epoch with the best validation auc
         if valid_auc > best_valid_auc:
@@ -69,7 +81,10 @@ def train_one_dataset(params, file_name, train_q_data, train_qa_data, train_pid,
                                 params.save,  file_name) + '_*'
             for i in glob.glob(path):
                 os.remove(i)
+            print(best_valid_auc, ' to ', valid_auc)
             best_valid_auc = valid_auc
+            cur_train_auc = train_auc
+            cur_test_auc = test_auc
             best_epoch = idx+1
             torch.save({'epoch': idx,
                         'model_state_dict': model.state_dict(),
@@ -82,7 +97,8 @@ def train_one_dataset(params, file_name, train_q_data, train_qa_data, train_pid,
         if idx-best_epoch > 40:
             break   
 
-    print("best_valid_auc\t", best_valid_auc, "\n")
+    print("cur_train_auc\t", cur_train_auc, "best_valid_auc\t", best_valid_auc, "\n", "cur_test_auc\t",\
+          cur_test_auc)
     
     try_makedirs('result')
     try_makedirs(os.path.join('result', params.model))
@@ -91,10 +107,13 @@ def train_one_dataset(params, file_name, train_q_data, train_qa_data, train_pid,
         'result', params.model, params.save, file_name), 'w')
     f_save_log.write("valid_auc:\n" + str(all_valid_auc) + "\n\n")
     f_save_log.write("train_auc:\n" + str(all_train_auc) + "\n\n")
+    f_save_log.write("test_auc:\n" + str(all_test_auc) + "\n\n")
     f_save_log.write("valid_loss:\n" + str(all_valid_loss) + "\n\n")
     f_save_log.write("train_loss:\n" + str(all_train_loss) + "\n\n")
+    f_save_log.write("test_loss:\n" + str(all_test_loss) + "\n\n")
     f_save_log.write("valid_accuracy:\n" + str(all_valid_accuracy) + "\n\n")
     f_save_log.write("train_accuracy:\n" + str(all_train_accuracy) + "\n\n")
+    f_save_log.write("test_accuracy:\n" + str(all_test_accuracy) + "\n\n")
     f_save_log.close()
     return best_epoch
 
@@ -124,7 +143,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to test KT')
     # Basic Parameters
 
-    parser.add_argument('--max_iter', type=int, default=300,
+    parser.add_argument('--max_iter', type=int, default=50,
                         help='number of iterations')
     parser.add_argument('--train_set', type=int, default=1)
     parser.add_argument('--seed', type=int, default=224, help='default seed')
@@ -176,46 +195,46 @@ if __name__ == '__main__':
     # Datasets and Model
     parser.add_argument('--model', type=str, default='akt_cid',
                         help="combination of akt/sakt/dkvmn/dkt (mandatory), pid/cid (mandatory) separated by underscore '_'. For example tf_pid")
-    parser.add_argument('--dataset', type=str, default="assist2009_updated")
+    parser.add_argument('--dataset', type=str, default="STATICS")
 
     params = parser.parse_args()
     dataset = params.dataset
 
     if dataset in {"assist2009_updated"}:
         params.n_question = 110
-        params.batch_size = 24
+        params.batch_size = 128
         params.seqlen = 200
         params.data_dir = '../dataset/'+dataset
         params.data_name = dataset
         params.n_pid = 16891
 
     if dataset in {"assist2017"}:
-        params.batch_size = 24
+        params.batch_size = 32
         params.seqlen = 200
-        params.data_dir = '../dataset/'+dataset+'/cross_validation_data'
+        params.data_dir = '../dataset/'+dataset+'/train_valid_test'
         params.data_name = dataset
         params.n_question = 102
         params.n_pid = 3162
 
     if dataset in {"assist2015"}:
         params.n_question = 100
-        params.batch_size = 24
+        params.batch_size = 128
         params.seqlen = 200
         params.data_dir = '../dataset/'+dataset
         params.data_name = dataset
 
     if dataset in {"STATICS"}:
         params.n_question = 1223
-        params.batch_size = 24
+        params.batch_size = 32
         params.seqlen = 200
         params.data_dir = '../dataset/'+dataset
         params.data_name = dataset
 
     if dataset in {"synthetic"}:
         params.n_question = 50
-        params.batch_size = 24
+        params.batch_size = 128
         params.seqlen = 200
-        params.data_dir = '../dataset/'+dataset+'/cross_validation_data'
+        params.data_dir = '../dataset/'+dataset
         params.data_name = 'naive_c5_q50_s4000_v0'
 
     params.save = params.data_name
@@ -248,21 +267,27 @@ if __name__ == '__main__':
         params.data_name + "_train"+str(params.train_set)+".csv"
     valid_data_path = params.data_dir + "/" + \
         params.data_name + "_valid"+str(params.train_set)+".csv"
+    test_data_path = params.data_dir + "/" + \
+        params.data_name + "_test.csv"
 
     train_q_data, train_qa_data, train_pid = dat.load_data(train_data_path)
     valid_q_data, valid_qa_data, valid_pid = dat.load_data(valid_data_path)
+    test_q_data, test_qa_data, test_pid = dat.load_data(test_data_path)
     
-    print(train_data_path, valid_data_path)
+    print(train_data_path, valid_data_path, test_data_path)
     print("\n")
     print("train_q_data.shape", train_q_data.shape)
     print("train_qa_data.shape", train_qa_data.shape)
     print("valid_q_data.shape", valid_q_data.shape)  # (1566, 200)
     print("valid_qa_data.shape", valid_qa_data.shape)  # (1566, 200)
+    print("test_q_data.shape", test_q_data.shape)
+    print("test_qa_data.shape", test_qa_data.shape)
     print("\n")
 
     # Train and get the best episode
     best_epoch = train_one_dataset(
-        params, file_name, train_q_data, train_qa_data, train_pid, valid_q_data, valid_qa_data, valid_pid)
+        params, file_name, train_q_data, train_qa_data, train_pid, valid_q_data, valid_qa_data, valid_pid,\
+        test_q_data, test_qa_data, test_pid)
     
     # test_data_path = params.data_dir + "/" + \
     #     params.data_name + "_test"+str(params.train_set)+".csv"
