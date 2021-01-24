@@ -314,7 +314,7 @@ def train():
                 pred_score = pred_score.astype(int)
                 pred_score = np.equal(actual_labels, pred_score)
                 acc = np.mean(pred_score.astype(int))
-                logger.info("epochs {0}: rmse {1:g}  auc {2:g}  r2 {3:g}  acc{4:g} ".format((iii +1),rmse, train_auc, r2, acc))
+                logger.info("TRAINING epochs {0}: rmse {1:g}  auc {2:g}  r2 {3:g}  acc{4:g} ".format((iii +1),rmse, train_auc, r2, acc))
                 # with open('assist2009_train_auc', mode='a') as file:
                 #     file.write('train {0}: auc {1:g} loss {2:g}'.format((iii +1), auc, overall_loss/count))
                 #     file.write('\n')
@@ -381,7 +381,7 @@ def train():
                     pred_score = np.equal(actual_labels, pred_score)
                     acc = np.mean(pred_score.astype(int))
 
-                    logger.info("VALIDATION {0}: rmse {1:g}  auc {2:g}  r2 {3:g}  acc{4:g} ".format((iii +1)/FLAGS.evaluation_interval, rmse, valid_auc, r2, acc))
+                    logger.info("VALIDATION {0}: rmse {1:g}  auc {2:g}  r2 {3:g}  acc {4:g} ".format((iii +1)/FLAGS.evaluation_interval, rmse, valid_auc, r2, acc))
                     # with open('assist2009_valid_auc', mode='a') as file:
                     #     file.write('validation {0}: auc {1:g} loss {2:g}'.format((iii + 1)/FLAGS.evaluation_interval, auc, overall_loss/count))
                     #     file.write('\n')
@@ -458,7 +458,7 @@ def train():
                     pred_score = np.equal(actual_labels, pred_score)
                     acc = np.mean(pred_score.astype(int))
 
-                    logger.info("TESTING {0}: rmse {1:g}  auc {2:g}  r2 {3:g}   acc{4:g} ".format((iii +1)/FLAGS.evaluation_interval, rmse, test_auc, r2, acc))
+                    logger.info("TESTING {0}: rmse {1:g}  auc {2:g}  r2 {3:g}   acc {4:g} ".format((iii +1)/FLAGS.evaluation_interval, rmse, test_auc, r2, acc))
                     # with open('assist2009_valid_auc', mode='a') as file:
                     #     file.write('validation {0}: auc {1:g} loss {2:g}'.format((iii + 1)/FLAGS.evaluation_interval, auc, overall_loss/count))
                     #     file.write('\n')
