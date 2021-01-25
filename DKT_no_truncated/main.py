@@ -8,7 +8,7 @@ from run import train, test
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gpu', type=int, default=-1)
+    parser.add_argument('--gpu', type=int, default=0)
     parser.add_argument('--max_iter', type=int, default=30, help='number of iterations')
     parser.add_argument('--decay_epoch', type=int, default=20, help='number of iterations')
     parser.add_argument('--test', type=bool, default=False, help='enable testing')
