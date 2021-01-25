@@ -2,3 +2,5 @@
 *.out
 __pycache__
 .DS_Store
+*/.idea/
+CKT/runs/
