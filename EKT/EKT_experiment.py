@@ -174,30 +174,31 @@ if __name__ == '__main__':
     ]
     # data_source = str(sys.argv[1])
 
-    list_knowledge_emb_size = [25, 50, 100]
-    list_seq_hidden_size = [50, 100, 150]
-    list_text_emb_size = [25, 50, 100]
+    list_knowledge_emb_size = [25, 25, 25, 50, 50, 50, 50, 100, 100, 100]
+    list_seq_hidden_size = [50, 100, 150, 50, 100, 100, 150, 50, 100, 150]
+    list_text_emb_size = [50, 50, 25, 25, 50, 100, 50, 100, 50, 25]
 
     for data_source, num_concept in list_datasets[0:1]:
-        for k in list_knowledge_emb_size:
-            for s in list_seq_hidden_size:
-                for t in list_text_emb_size:
-                    main(env="EKT",
-                        model_name="EKT",
-                        data_source=data_source,
-                        is_text=True,
-                        output_dim = num_concept,
-                        input_dim = 2 * num_concept,
-                        lr=0.001,
-                        lr_decay=1,
-                        weight_decay=0,
-                        
-                        knowledge_emb_size=k,
-                        seq_hidden_size=s,
-                        text_emb_size=t,
+        for i in range(10):
+            k = list_knowledge_emb_size[i]
+            s = list_seq_hidden_size[i]
+            t = list_text_emb_size[i]
+            main(env="EKT",
+                model_name="EKT",
+                data_source=data_source,
+                is_text=True,
+                output_dim = num_concept,
+                input_dim = 2 * num_concept,
+                lr=0.001,
+                lr_decay=1,
+                weight_decay=0,
+                
+                knowledge_emb_size=k,
+                seq_hidden_size=s,
+                text_emb_size=t,
 
-                        max_epoch=20,
-                        batch_size=1,
-                        vis=False,
-                        issave=False)
+                max_epoch=20,
+                batch_size=1,
+                vis=False,
+                issave=False)
 
