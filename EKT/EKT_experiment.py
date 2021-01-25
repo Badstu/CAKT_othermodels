@@ -63,7 +63,7 @@ def main(**kwargs):
     init_loss_file(opt)
     if opt.data_source == "STATICS" or opt.data_source == "assist2017":
         opt.fold_dataset = True
-    train_path, valid_path = init_file_path(opt)
+    train_path, valid_path, test_path = init_file_path(opt)
     # print(opt.fold_dataset)
 
     # random_state = random.randint(1, 50)
@@ -72,7 +72,7 @@ def main(**kwargs):
     valid_dataset = KTData(valid_path, fold_dataset=opt.fold_dataset, q_numbers=opt.output_dim, opt='None')
     test_dataset = KTData(test_path, fold_dataset=opt.fold_dataset, q_numbers=opt.output_dim, opt='None')
 
-    print(len(train_dataset), len(valid_dataset))
+    print(len(train_dataset), len(valid_dataset), len(test_dataset))
 
     train_loader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True, num_workers=opt.num_workers,
                               drop_last=True, collate_fn=myutils.collate_fn)
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     list_seq_hidden_size = [50, 100, 150]
     list_text_emb_size = [25, 50, 100]
 
-    for data_source, num_concept in list_datasets:
+    for data_source, num_concept in list_datasets[0:1]:
         for k in list_knowledge_emb_size:
             for s in list_seq_hidden_size:
                 for t in list_text_emb_size:
