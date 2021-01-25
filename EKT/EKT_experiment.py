@@ -68,7 +68,7 @@ def main(**kwargs):
 
     # random_state = random.randint(1, 50)
     # print("random_state:", random_state)
-    train_dataset = KTData(train_path, fold_dataset=True, q_numbers=opt.output_dim, opt='None')
+    train_dataset = KTData(train_path, fold_dataset=opt.fold_dataset, q_numbers=opt.output_dim, opt='None')
     valid_dataset = KTData(valid_path, fold_dataset=opt.fold_dataset, q_numbers=opt.output_dim, opt='None')
     # test_dataset = KTData(test_path, fold_dataset=opt.fold_dataset, q_numbers=opt.output_dim, opt='None')
 
@@ -84,8 +84,6 @@ def main(**kwargs):
     if opt.model_name == "EKT":
         model = EKTM_dev(knowledge_length=opt.output_dim, knowledge_emb_size=25,
                          seq_hidden_size=100, is_text=opt.is_text, text_emb_size=50, gpu=opt.gpu)
-
-    random_text_token = torch.randn((50, ))
 
     lr = opt.lr
     last_epoch = -1
@@ -169,23 +167,21 @@ if __name__ == '__main__':
     ]
     # data_source = str(sys.argv[1])
 
-    for data_source, num_concept in list_datasets[::-1]:
-        for cv_times in range(1, 6):
-            main(env="EKT",
-                model_name="EKT",
-                data_source=data_source,
-                cv_times=cv_times,
-                is_text=True,
-                output_dim = num_concept,
-                input_dim = 2 * num_concept,
-                lr=0.001,
-                lr_decay=1,
-                weight_decay=0,
-                hidden_dim=200,
-                embed_dim=200,
+    for data_source, num_concept in list_datasets[2: 3]:
+        main(env="EKT",
+            model_name="EKT",
+            data_source=data_source,
+            is_text=True,
+            output_dim = num_concept,
+            input_dim = 2 * num_concept,
+            lr=0.001,
+            lr_decay=1,
+            weight_decay=0,
+            hidden_dim=200,
+            embed_dim=200,
 
-                max_epoch=20,
-                batch_size=1,
-                vis=False,
-                issave=False)
+            max_epoch=20,
+            batch_size=1,
+            vis=False,
+            issave=False)
 
