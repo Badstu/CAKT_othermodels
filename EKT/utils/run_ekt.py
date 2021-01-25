@@ -64,7 +64,7 @@ def train_ekt(opt, vis, model, data_loader, epoch, lr, optimizer):
         
         # if np.sum(gt_label) == len(gt_label) or np.sum(gt_label) == 0:
         #     continue
-        print(gt_label, pred_label)
+        # print(gt_label, pred_label)
         # print(roc_auc_score(gt_label, pred_label))
 
         all_pred.append(pred_label)
@@ -94,7 +94,6 @@ def train_ekt(opt, vis, model, data_loader, epoch, lr, optimizer):
     pred_1d = np.concatenate(all_pred, axis=0)
     target_1d = np.concatenate(all_target, axis=0)
 
-    print(pred_1d, target_1d)
     auc = roc_auc_score(target_1d, pred_1d)
     # print('train overall auc = ', auc)
 
