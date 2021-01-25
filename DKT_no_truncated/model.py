@@ -66,5 +66,6 @@ class MODEL(nn.Module):
         filtered_target = torch.masked_select(target_1d, mask)
         filtered_pred = torch.sigmoid(filtered_pred)
 
-        # loss = torch.nn.functional.binary_cross_entropy_with_logits(filtered_pred, filtered_target)
-        return filtered_pred, filtered_target
+        loss = torch.nn.functional.binary_cross_entropy_with_logits(filtered_pred, filtered_target)
+
+        return loss, filtered_pred, filtered_target
