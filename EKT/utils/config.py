@@ -21,8 +21,6 @@ class Config:
     batch_size = 4 if isdev else 64
     num_workers = 1 if isdev else 8
 
-    num_concept = 110
-
     H = 15
     embed_dim = 225
     hidden_dim = 225

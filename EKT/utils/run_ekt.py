@@ -44,7 +44,7 @@ def train_ekt(opt, vis, model, data_loader, epoch, lr, optimizer):
 
         hidden_state = None
         for i, item in enumerate(each_seq):
-            label = 0 if item <= opt.num_concept else 1
+            label = 0 if item <= opt.output_dim else 1
             label = torch.Tensor([label])
             label = label.float().to(opt.device)
 
@@ -145,7 +145,7 @@ def valid_ekt(opt, vis, model, valid_loader, epoch):
 
         hidden_state = None
         for i, item in enumerate(each_seq):
-            label = 0 if item <= opt.num_concept else 1
+            label = 0 if item <= opt.output_dim else 1
             label = torch.Tensor([label])
             label = label.float().to(opt.device)
             # print(item, label)
