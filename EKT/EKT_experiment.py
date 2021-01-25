@@ -178,7 +178,7 @@ if __name__ == '__main__':
     list_seq_hidden_size = [50, 100, 150, 50, 100, 100, 150, 50, 100, 150]
     list_text_emb_size = [50, 50, 25, 25, 50, 100, 50, 100, 50, 25]
 
-    for data_source, num_concept in list_datasets[0:1]:
+    for data_source, num_concept in list_datasets[4:5]:
         for i in range(10):
             k = list_knowledge_emb_size[i]
             s = list_seq_hidden_size[i]
