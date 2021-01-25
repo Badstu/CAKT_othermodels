@@ -4,3 +4,7 @@ __pycache__
 .DS_Store
 */.idea/
 CKT/runs/
+AKT/model
+AKT/model/*
+AKT/result
+AKT/result/*
