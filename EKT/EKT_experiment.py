@@ -61,7 +61,7 @@ def main(**kwargs):
         vis = None
 
     init_loss_file(opt)
-    if opt.data_source == "STATICS":
+    if opt.data_source == "STATICS" or opt.data_source == "assist2017":
         opt.fold_dataset = True
     train_path, valid_path = init_file_path(opt)
     # print(opt.fold_dataset)
@@ -70,7 +70,7 @@ def main(**kwargs):
     # print("random_state:", random_state)
     train_dataset = KTData(train_path, fold_dataset=opt.fold_dataset, q_numbers=opt.output_dim, opt='None')
     valid_dataset = KTData(valid_path, fold_dataset=opt.fold_dataset, q_numbers=opt.output_dim, opt='None')
-    # test_dataset = KTData(test_path, fold_dataset=opt.fold_dataset, q_numbers=opt.output_dim, opt='None')
+    test_dataset = KTData(test_path, fold_dataset=opt.fold_dataset, q_numbers=opt.output_dim, opt='None')
 
     print(len(train_dataset), len(valid_dataset))
 
@@ -78,12 +78,12 @@ def main(**kwargs):
                               drop_last=True, collate_fn=myutils.collate_fn)
     valid_loader = DataLoader(valid_dataset, batch_size=opt.batch_size, shuffle=True, num_workers=opt.num_workers,
                               drop_last=True, collate_fn=myutils.collate_fn)
-    # test_loader = DataLoader(test_dataset, batch_size=opt.batch_size, shuffle=True, num_workers=opt.num_workers,
-    #                          drop_last=True, collate_fn=myutils.collate_fn)
+    test_loader = DataLoader(test_dataset, batch_size=opt.batch_size, shuffle=True, num_workers=opt.num_workers,
+                             drop_last=True, collate_fn=myutils.collate_fn)
 
     if opt.model_name == "EKT":
-        model = EKTM_dev(knowledge_length=opt.output_dim, knowledge_emb_size=25,
-                         seq_hidden_size=100, is_text=opt.is_text, text_emb_size=50, gpu=opt.gpu)
+        model = EKTM_dev(knowledge_length=opt.output_dim, knowledge_emb_size=opt.knowledge_emb_size,
+                         seq_hidden_size=opt.seq_hidden_size, is_text=opt.is_text, text_emb_size=opt.text_emb_size, gpu=opt.gpu)
 
     lr = opt.lr
     last_epoch = -1
@@ -107,6 +107,8 @@ def main(**kwargs):
     loss_result = {}
     auc_resilt = {}
     best_val_auc = 0
+    corr_train_auc = 0
+    corr_test_auc = 0
     # START TRAIN
     for epoch in range(opt.max_epoch):
         if epoch < last_epoch:
@@ -114,14 +116,14 @@ def main(**kwargs):
         if opt.model_name == "EKT":
             train_loss_meter, train_auc, train_loss_list = run_ekt.train_ekt(opt, vis, model, train_loader, epoch, lr, optimizer)
             val_loss_meter, val_auc, val_loss_list = run_ekt.valid_ekt(opt, vis, model, valid_loader, epoch)
-            # test_loss_meter, test_auc, test_loss_list = run_ekt.valid_ekt(opt, vis, model, test_loader, epoch)
+            test_loss_meter, test_auc, test_loss_list = run_ekt.valid_ekt(opt, vis, model, test_loader, epoch)
 
         loss_result["train_loss"] = train_loss_meter.value()[0]
         auc_resilt["train_auc"] = train_auc
         loss_result["val_loss"] = val_loss_meter.value()[0]
         auc_resilt["val_auc"] = val_auc
-        # loss_result["test_loss"] = test_loss_meter.value()[0]
-        # auc_resilt["test_auc"] = test_auc
+        loss_result["test_loss"] = test_loss_meter.value()[0]
+        auc_resilt["test_auc"] = test_auc
 
         for k, v in loss_result.items():
             print("epoch:{epoch}, {k}:{v:.5f}".format(epoch=epoch, k=k, v=v))
@@ -140,8 +142,13 @@ def main(**kwargs):
                          name=k,
                          update='append')
 
-        best_val_auc = max(best_val_auc, val_auc)
-        print("dataset:{}, train_set:{}, best_val_auc:{}".format(opt.data_source, opt.cv_times, best_val_auc))
+        if val_auc > best_val_auc:
+            best_val_auc = val_auc
+            corr_train_auc = train_auc
+            corr_test_auc = test_auc
+
+        print("DATASET: {}, knowledge_emb_size: {}, seq_hidden_size: {}, text_emb_size: {}".format(opt.data_source, opt.knowledge_emb_size, opt.seq_hidden_size, opt.text_emb_size))
+        print("best_val_auc:{}, corr_train_auc: {}, corr_test_auc: {}".format(best_val_auc, corr_train_auc, corr_test_auc))
 
         # TODO 每个epoch结束后把loss写入文件
         # myutils.save_loss_file(opt, epoch, train_loss_list, val_loss_list, test_loss_list)
@@ -167,21 +174,30 @@ if __name__ == '__main__':
     ]
     # data_source = str(sys.argv[1])
 
-    for data_source, num_concept in list_datasets[2: 3]:
-        main(env="EKT",
-            model_name="EKT",
-            data_source=data_source,
-            is_text=True,
-            output_dim = num_concept,
-            input_dim = 2 * num_concept,
-            lr=0.001,
-            lr_decay=1,
-            weight_decay=0,
-            hidden_dim=200,
-            embed_dim=200,
+    list_knowledge_emb_size = [25, 50, 100]
+    list_seq_hidden_size = [50, 100, 150]
+    list_text_emb_size = [25, 50, 100]
 
-            max_epoch=20,
-            batch_size=1,
-            vis=False,
-            issave=False)
+    for data_source, num_concept in list_datasets:
+        for k in list_knowledge_emb_size:
+            for s in list_seq_hidden_size:
+                for t in list_text_emb_size:
+                    main(env="EKT",
+                        model_name="EKT",
+                        data_source=data_source,
+                        is_text=True,
+                        output_dim = num_concept,
+                        input_dim = 2 * num_concept,
+                        lr=0.001,
+                        lr_decay=1,
+                        weight_decay=0,
+                        
+                        knowledge_emb_size=k,
+                        seq_hidden_size=s,
+                        text_emb_size=t,
+
+                        max_epoch=20,
+                        batch_size=1,
+                        vis=False,
+                        issave=False)
 
