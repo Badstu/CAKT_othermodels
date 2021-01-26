@@ -147,9 +147,6 @@ def main(**kwargs):
             corr_train_auc = train_auc
             corr_test_auc = test_auc
 
-        print("DATASET: {}, knowledge_emb_size: {}, seq_hidden_size: {}, text_emb_size: {}".format(opt.data_source, opt.knowledge_emb_size, opt.seq_hidden_size, opt.text_emb_size))
-        print("best_val_auc:{}, corr_train_auc: {}, corr_test_auc: {}".format(best_val_auc, corr_train_auc, corr_test_auc))
-
         # TODO 每个epoch结束后把loss写入文件
         # myutils.save_loss_file(opt, epoch, train_loss_list, val_loss_list, test_loss_list)
 
@@ -162,6 +159,9 @@ def main(**kwargs):
 
     # TODO 结束的时候保存final模型参数
     myutils.save_model_weight(opt, model, optimizer, epoch, lr, is_final=True)
+
+    print("DATASET: {}, knowledge_emb_size: {}, seq_hidden_size: {}, text_emb_size: {}".format(opt.data_source, opt.knowledge_emb_size, opt.seq_hidden_size, opt.text_emb_size))
+    print("best_val_auc:{}, corr_train_auc: {}, corr_test_auc: {}".format(best_val_auc, corr_train_auc, corr_test_auc))
 
 
 if __name__ == '__main__':
@@ -178,8 +178,8 @@ if __name__ == '__main__':
     list_seq_hidden_size = [50, 100, 150, 50, 100, 100, 150, 50, 100, 150]
     list_text_emb_size = [50, 50, 25, 25, 50, 100, 50, 100, 50, 25]
 
-    for data_source, num_concept in list_datasets[0:1]:
-        for i in range(10):
+    for data_source, num_concept in list_datasets[1:2]:
+        for i in range(5, 10):
             k = list_knowledge_emb_size[i]
             s = list_seq_hidden_size[i]
             t = list_text_emb_size[i]
