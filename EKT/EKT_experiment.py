@@ -179,7 +179,7 @@ if __name__ == '__main__':
     list_seq_hidden_size = [50, 100, 150, 50, 100, 100, 150, 50, 100, 150]
     list_text_emb_size = [50, 50, 25, 25, 50, 100, 50, 100, 50, 25]
 
-    for data_source, num_concept in list_datasets[1:2]:
+    for data_source, num_concept in list_datasets[0:1]:
         for i in range(10):
             k = list_knowledge_emb_size[i]
             s = list_seq_hidden_size[i]
@@ -187,7 +187,7 @@ if __name__ == '__main__':
             main(env="EKT",
                 model_name="EKT",
                 data_source=data_source,
-                is_text=True,
+                is_text=False,
                 output_dim = num_concept,
                 input_dim = 2 * num_concept,
                 lr=0.001,
