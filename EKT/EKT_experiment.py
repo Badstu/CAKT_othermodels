@@ -146,6 +146,7 @@ def main(**kwargs):
             best_val_auc = val_auc
             corr_train_auc = train_auc
             corr_test_auc = test_auc
+            print("best_val_auc: {}".format(best_val_auc))
 
         # TODO 每个epoch结束后把loss写入文件
         # myutils.save_loss_file(opt, epoch, train_loss_list, val_loss_list, test_loss_list)
@@ -179,7 +180,7 @@ if __name__ == '__main__':
     list_text_emb_size = [50, 50, 25, 25, 50, 100, 50, 100, 50, 25]
 
     for data_source, num_concept in list_datasets[1:2]:
-        for i in range(8, 10):
+        for i in range(10):
             k = list_knowledge_emb_size[i]
             s = list_seq_hidden_size[i]
             t = list_text_emb_size[i]
