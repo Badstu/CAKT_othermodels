@@ -23,7 +23,7 @@ def main():
     parser.add_argument('--max_grad_norm', type=float, default=3.0, help='maximum gradient norm')
     parser.add_argument('--hidden_dim', type=int, default=32, help='hidden layer dimension')
     parser.add_argument('--n_hidden', type=int, default=2, help='hidden numbers')
-    parser.add_argument('--dataset', type=str, default='assist2009_updated')
+    parser.add_argument('--dataset', type=str, default='assist2017')
 
     if parser.parse_args().dataset == 'assist2009_updated':
         parser.add_argument('--batch_size', type=int, default=100, help='the batch size')
@@ -50,7 +50,7 @@ def main():
         parser.add_argument('--qa_embed_dim', type=int, default=200, help='answer and question embedding dimensions')
         parser.add_argument('--n_question', type=int, default=102, help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
-        parser.add_argument('--data_dir', type=str, default='./data/assist2017', help='data directory')
+        parser.add_argument('--data_dir', type=str, default='../dataset/assist2017/train_valid_test', help='data directory')
         parser.add_argument('--data_name', type=str, default='assist2017', help='data set name')
         parser.add_argument('--load', type=str, default='assist2017', help='model file to load')
         parser.add_argument('--save', type=str, default='assist2017', help='path to save model')
