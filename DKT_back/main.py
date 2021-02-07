@@ -15,13 +15,13 @@ def main():
     parser.add_argument('--train_test', type=bool, default=True, help='enable testing')
     parser.add_argument('--show', type=bool, default=True, help='print progress')
     parser.add_argument('--init_std', type=float, default=0.1, help='weight initialization std')
-    parser.add_argument('--init_lr', type=float, default=0.01, help='initial learning rate')
+    parser.add_argument('--init_lr', type=float, default=0.001, help='initial learning rate')
     parser.add_argument('--lr_decay', type=float, default=0.75, help='learning rate decay')
     parser.add_argument('--final_lr', type=float, default=1E-5,
                         help='learning rate will not decrease after hitting this threshold')
     parser.add_argument('--momentum', type=float, default=0.9, help='momentum rate')
     parser.add_argument('--max_grad_norm', type=float, default=3.0, help='maximum gradient norm')
-    parser.add_argument('--hidden_dim', type=int, default=32, help='hidden layer dimension')
+    parser.add_argument('--hidden_dim', type=int, default=200, help='hidden layer dimension')
     parser.add_argument('--n_hidden', type=int, default=2, help='hidden numbers')
     parser.add_argument('--dataset', type=str, default='assist2017')
 
@@ -46,7 +46,7 @@ def main():
         parser.add_argument('--save', type=str, default='assist2015', help='path to save model')
 
     elif parser.parse_args().dataset == 'assist2017':
-        parser.add_argument('--batch_size', type=int, default=100, help='the batch size')
+        parser.add_argument('--batch_size', type=int, default=32, help='the batch size')
         parser.add_argument('--qa_embed_dim', type=int, default=200, help='answer and question embedding dimensions')
         parser.add_argument('--n_question', type=int, default=102, help='the number of unique questions in the dataset')
         parser.add_argument('--seqlen', type=int, default=200, help='the allowed maximum length of a sequence')
