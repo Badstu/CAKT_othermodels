@@ -251,7 +251,13 @@ def train():
             best_valid_auc = 0
             corr_train_auc = 0
             corr_test_auc = 0
+            train_savefile, test_savefile = None, None ###
             for iii in range(FLAGS.epochs):
+                ###
+                if iii == FLAGS.epochs - 1:
+                    train_savefile = open("checkpoints/{}_train_predict.csv".format(name), "w")
+                    test_savefile = open("checkpoints/{}_test_predict.csv".format(name), "w")
+                ###
                 random.shuffle(train_students)
                 a=datetime.now()
                 data_size = len(train_students)
@@ -269,12 +275,15 @@ def train():
                     target_correctness = []
                     target_id2 = []
                     target_correctness2 = []
+                    each_length = [] ###
+                    labels = [] ###
                     for i in range(FLAGS.batch_size):
                         student = train_students[index+i]
                         problem_ids = student[1]
                         correctness = student[2]
                         correct_num = np.zeros(max_num_skills)
                         answer_count = np.ones(max_num_skills)
+                        each_label = [] ###
                         for j in range(len(problem_ids)-1):
                             problem_id = int(problem_ids[j])
                             
@@ -291,12 +300,27 @@ def train():
                             target_id.append(i*max_num_steps+j)
                             target_correctness.append(int(correctness[j+1]))
                             actual_labels.append(int(correctness[j+1]))
+                            each_label.append(int(correctness[j+1])) ###
+                        each_length.append(len(each_label)) ###
+                        labels.append(each_label) ###
                         target_id2.append(i*max_num_steps+j)
                         target_correctness2.append(int(correctness[j+1]))
                         
                     index += FLAGS.batch_size
                     #print(ability)
                     pred, loss = train_step(x, xx, l, next_id, target_id, target_correctness, target_id2, target_correctness2)
+                    
+                    # get label and pred to save
+                    if train_savefile is not None:
+                        start = 0
+                        for ii, length in enumerate(each_length):
+                            each_pred = pred[start:start+length]
+                            each_lab = labels[ii]
+                            each_pred = ",".join(map(str, each_pred))
+                            each_lab = ",".join(map(str, each_lab))
+                            train_savefile.write(str(length)+"\n"+each_pred+"\n"+each_lab+"\n")
+                            start += length
+                    #############################
                     overall_loss += loss
                     count += 1
                     for p in pred:
@@ -416,12 +440,15 @@ def train():
                         target_correctness = []
                         target_id2 = []
                         target_correctness2 = []
+                        each_length = [] ###
+                        labels = [] ###
                         for i in range(FLAGS.batch_size):
                             student = test_students[index+i]
                             problem_ids = student[1]
                             correctness = student[2]
                             correct_num = np.zeros(max_num_skills)
                             answer_count = np.ones(max_num_skills)
+                            each_label = [] ###
                             for j in range(len(problem_ids)-1):
                                 problem_id = int(problem_ids[j])
                                 
@@ -437,17 +464,30 @@ def train():
                                 target_id.append(i*max_num_steps+j)
                                 target_correctness.append(int(correctness[j+1]))
                                 actual_labels.append(int(correctness[j+1]))
+                                each_label.append(int(correctness[j+1])) ###
+                            each_length.append(len(each_label)) ###
+                            labels.append(each_label) ###
                             target_id2.append(i*max_num_steps+j)
                             target_correctness2.append(int(correctness[j+1]))
-                            
 
                         index += FLAGS.batch_size
                         pred, loss = validation_step(x, xx, l, next_id, target_id, target_correctness, target_id2, target_correctness2)
+                        # get label and pred to save
+                        if test_savefile is not None:
+                            start = 0
+                            for ii, length in enumerate(each_length):
+                                each_pred = pred[start:start+length]
+                                each_lab = labels[ii]
+                                each_pred = ",".join(map(str, each_pred))
+                                each_lab = ",".join(map(str, each_lab))
+                                test_savefile.write(str(length)+"\n"+each_pred+"\n"+each_lab+"\n")
+                                start += length
+                        #############################
                         overall_loss += loss
                         count += 1
                         for p in pred:
                             pred_labels.append(p)
-
+                    
                     rmse = sqrt(mean_squared_error(actual_labels, pred_labels))
                     fpr, tpr, thresholds = metrics.roc_curve(actual_labels, pred_labels, pos_label=1)
                     test_auc = metrics.auc(fpr, tpr)
@@ -471,6 +511,11 @@ def train():
                         corr_train_auc = train_auc
                         corr_test_auc = test_auc
                     #########################################
+                ###
+                if iii == FLAGS.epochs - 1:
+                    train_savefile.close()
+                    test_savefile.close()
+                ###
 
                 if ((iii+1) % FLAGS.checkpoint_every == 0) and False:
                     checkpoint_prefix = os.path.join(checkpoint_dir, "model")
