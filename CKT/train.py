@@ -483,7 +483,7 @@ def train():
                                 each_qid = ",".join(map(str, each_qid))
                                 each_pred = ",".join(map(str, each_pred))
                                 each_lab = ",".join(map(str, each_lab))
-                                train_savefile.write(str(length)+"\n"+each_qid+"\n"+each_lab+"\n"+each_pred+"\n")
+                                test_savefile.write(str(length)+"\n"+each_qid+"\n"+each_lab+"\n"+each_pred+"\n")
                                 start += length
                         #############################
                         overall_loss += loss
