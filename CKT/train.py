@@ -55,7 +55,7 @@ tf.flags.DEFINE_float("keep_prob", dropout_prob, "Keep probability for dropout")
 tf.flags.DEFINE_integer("hidden_size", hidden_size, "The number of hidden nodes (Integer)")
 tf.flags.DEFINE_integer("evaluation_interval", 1, "Evaluate and print results every x epochs")
 tf.flags.DEFINE_integer("batch_size", 50, "Batch size for training.")
-tf.flags.DEFINE_integer("epochs", 300, "Number of epochs to train for.")
+tf.flags.DEFINE_integer("epochs", 100, "Number of epochs to train for.")
 
 if name == 'synthetic':
     tf.flags.DEFINE_string("train_data_path", '../dataset/synthetic/naive_c5_q50_s4000_v0_train'+ number +'.csv', "Path to the training dataset")
@@ -255,8 +255,8 @@ def train():
             for iii in range(FLAGS.epochs):
                 ###
                 if iii == FLAGS.epochs - 1:
-                    train_savefile = open("checkpoints/{}_train_predict.csv".format(name), "w")
-                    test_savefile = open("checkpoints/{}_test_predict.csv".format(name), "w")
+                    train_savefile = open("checkpoints/{}_train_trend.csv".format(name), "w")
+                    test_savefile = open("checkpoints/{}_test_trend.csv".format(name), "w")
                 ###
                 random.shuffle(train_students)
                 a=datetime.now()
@@ -309,16 +309,17 @@ def train():
                     index += FLAGS.batch_size
                     #print(ability)
                     pred, loss = train_step(x, xx, l, next_id, target_id, target_correctness, target_id2, target_correctness2)
-                    
                     # get label and pred to save
                     if train_savefile is not None:
                         start = 0
                         for ii, length in enumerate(each_length):
+                            each_qid = xx[ii, start:start+length]
                             each_pred = pred[start:start+length]
                             each_lab = labels[ii]
+                            each_qid = ",".join(map(str, each_qid))
                             each_pred = ",".join(map(str, each_pred))
                             each_lab = ",".join(map(str, each_lab))
-                            train_savefile.write(str(length)+"\n"+each_pred+"\n"+each_lab+"\n")
+                            train_savefile.write(str(length)+"\n"+each_qid+"\n"+each_lab+"\n"+each_pred+"\n")
                             start += length
                     #############################
                     overall_loss += loss
@@ -476,11 +477,13 @@ def train():
                         if test_savefile is not None:
                             start = 0
                             for ii, length in enumerate(each_length):
+                                each_qid = xx[ii, start:start+length]
                                 each_pred = pred[start:start+length]
                                 each_lab = labels[ii]
+                                each_qid = ",".join(map(str, each_qid))
                                 each_pred = ",".join(map(str, each_pred))
                                 each_lab = ",".join(map(str, each_lab))
-                                test_savefile.write(str(length)+"\n"+each_pred+"\n"+each_lab+"\n")
+                                train_savefile.write(str(length)+"\n"+each_qid+"\n"+each_lab+"\n"+each_pred+"\n")
                                 start += length
                         #############################
                         overall_loss += loss
