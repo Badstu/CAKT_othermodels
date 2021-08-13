@@ -255,8 +255,8 @@ def train():
             for iii in range(FLAGS.epochs):
                 ###
                 if iii == FLAGS.epochs - 1:
-                    train_savefile = open("checkpoints/{}_train_trend.csv".format(name), "w")
-                    test_savefile = open("checkpoints/{}_test_trend.csv".format(name), "w")
+                    train_savefile = open("checkpoints/ckt_{}_train_trend.csv".format(name), "w")
+                    test_savefile = open("checkpoints/ckt_{}_test_trend.csv".format(name), "w")
                 ###
                 random.shuffle(train_students)
                 a=datetime.now()
@@ -313,10 +313,10 @@ def train():
                     if train_savefile is not None:
                         start = 0
                         for ii, length in enumerate(each_length):
-                            each_qid = xx[ii, start:start+length]
+                            each_qid = xx[ii, :length]
                             each_pred = pred[start:start+length]
                             each_lab = labels[ii]
-                            each_qid = ",".join(map(str, each_qid))
+                            each_qid = ",".join(map(lambda x: str(int(x)), each_qid))
                             each_pred = ",".join(map(str, each_pred))
                             each_lab = ",".join(map(str, each_lab))
                             train_savefile.write(str(length)+"\n"+each_qid+"\n"+each_lab+"\n"+each_pred+"\n")
@@ -477,10 +477,10 @@ def train():
                         if test_savefile is not None:
                             start = 0
                             for ii, length in enumerate(each_length):
-                                each_qid = xx[ii, start:start+length]
+                                each_qid = xx[ii, :length]
                                 each_pred = pred[start:start+length]
                                 each_lab = labels[ii]
-                                each_qid = ",".join(map(str, each_qid))
+                                each_qid = ",".join(map(lambda x: str(int(x)), each_qid))
                                 each_pred = ",".join(map(str, each_pred))
                                 each_lab = ",".join(map(str, each_lab))
                                 test_savefile.write(str(length)+"\n"+each_qid+"\n"+each_lab+"\n"+each_pred+"\n")
